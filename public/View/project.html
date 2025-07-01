@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Space Adventure - Project Detail | Sam Dev</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Ubuntu+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../Css/project.css" />
+  </head>
+
+  <body>
+    <header class="hud">
+      <div class="logo">
+        <i class="fas fa-gamepad logo-icon"></i>
+        <h1>SAM DEV</h1>
+      </div>
+    </header>
+
+    <main class="project-detail" id="projectContainer">
+      <h3
+        style="
+          color: var(--primary);
+          font-family: 'Press Start 2P', cursive;
+          margin: 3rem 0 1.5rem;
+          text-align: center;
+        "
+      >
+        GALLERY
+      </h3>
+      <div class="project-gallery">
+        <div class="gallery-item">
+          <img
+            src="https://www.cbc.ca/kids/images/spaceadventure_thumbnail_2.jpg"
+            alt="Screenshot 1"
+          />
+          <div class="gallery-overlay">
+            <i class="fas fa-search-plus"></i>
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img
+            src="https://i.ytimg.com/vi/7Z9i4A6X9gI/maxresdefault.jpg"
+            alt="Screenshot 2"
+          />
+          <div class="gallery-overlay">
+            <i class="fas fa-search-plus"></i>
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img
+            src="https://cdn.cloudflare.steamstatic.com/steam/apps/1269620/ss_8c9f7b2f89e5f5ed6b7cda5d9d1b96a0c0b1d71c.1920x1080.jpg"
+            alt="Screenshot 3"
+          />
+          <div class="gallery-overlay">
+            <i class="fas fa-search-plus"></i>
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img
+            src="https://cdn.akamai.steamstatic.com/steam/apps/1269620/ss_3d4a8d5a4d5e6a8f0c2b9c7e0b5e8e0f7e9e5f9c.1920x1080.jpg"
+            alt="Screenshot 4"
+          />
+          <div class="gallery-overlay">
+            <i class="fas fa-search-plus"></i>
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img
+            src="https://cdn.akamai.steamstatic.com/steam/apps/1269620/ss_3d4a8d5a4d5e6a8f0c2b9c7e0b5e8e0f7e9e5f9c.1920x1080.jpg"
+            alt="Screenshot 5"
+          />
+          <div class="gallery-overlay">
+            <i class="fas fa-search-plus"></i>
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img
+            src="https://i.ytimg.com/vi/7Z9i4A6X9gI/maxresdefault.jpg"
+            alt="Screenshot 6"
+          />
+          <div class="gallery-overlay">
+            <i class="fas fa-search-plus"></i>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Lightbox -->
+    <div class="lightbox">
+      <div class="lightbox-content">
+        <img src="" alt="Project Screenshot" />
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-nav">
+          <button class="lightbox-prev">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button class="lightbox-next">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="social-links">
+        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+      </div>
+      <p class="copyright">
+        &copy; 2024 Sam Dev Game Studio. All rights reserved.
+      </p>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Lightbox functionality
+        const lightbox = document.querySelector(".lightbox");
+        const lightboxImg = lightbox.querySelector("img");
+        const lightboxClose = lightbox.querySelector(".lightbox-close");
+        const galleryItems = document.querySelectorAll(".gallery-item");
+        const lightboxPrev = document.querySelector(".lightbox-prev");
+        const lightboxNext = document.querySelector(".lightbox-next");
+
+        let currentImageIndex = 0;
+        const images = [];
+
+        // Collect all image sources
+        galleryItems.forEach((item) => {
+          images.push(item.querySelector("img").src);
+        });
+
+        // Open lightbox with clicked image
+        galleryItems.forEach((item, index) => {
+          item.addEventListener("click", () => {
+            currentImageIndex = index;
+            lightboxImg.src = images[currentImageIndex];
+            lightbox.classList.add("active");
+            document.body.style.overflow = "hidden";
+          });
+        });
+
+        // Close lightbox
+        lightboxClose.addEventListener("click", () => {
+          lightbox.classList.remove("active");
+          document.body.style.overflow = "";
+        });
+
+        // Close when clicking outside image
+        lightbox.addEventListener("click", (e) => {
+          if (e.target === lightbox) {
+            lightbox.classList.remove("active");
+            document.body.style.overflow = "";
+          }
+        });
+
+        // Navigation between images
+        lightboxPrev.addEventListener("click", (e) => {
+          e.stopPropagation();
+          currentImageIndex =
+            (currentImageIndex - 1 + images.length) % images.length;
+          lightboxImg.src = images[currentImageIndex];
+        });
+
+        lightboxNext.addEventListener("click", (e) => {
+          e.stopPropagation();
+          currentImageIndex = (currentImageIndex + 1) % images.length;
+          lightboxImg.src = images[currentImageIndex];
+        });
+
+        // Keyboard navigation
+        document.addEventListener("keydown", (e) => {
+          if (lightbox.classList.contains("active")) {
+            if (e.key === "Escape") {
+              lightbox.classList.remove("active");
+              document.body.style.overflow = "";
+            } else if (e.key === "ArrowLeft") {
+              currentImageIndex =
+                (currentImageIndex - 1 + images.length) % images.length;
+              lightboxImg.src = images[currentImageIndex];
+            } else if (e.key === "ArrowRight") {
+              currentImageIndex = (currentImageIndex + 1) % images.length;
+              lightboxImg.src = images[currentImageIndex];
+            }
+          }
+        });
+      });
+    </script>
+    <script>
+      async function loadProjects() {
+        try {
+          const response = await fetch("/api/projects");
+          allProjects = await response.json();
+        } catch (error) {
+          console.error("❌ Gagal load project:", error);
+        }
+      }
+
+      function renderProjects() {
+        const container = document.getElementById("projectContainer");
+        container.innerHTML = "";
+
+        projectsToShow.forEach((project) => {
+          const item = document.createElement("div");
+          item.className = "project-item";
+          item.innerHTML = `
+
+           <div class="project-header">
+        <h1 class="project-title">${project.title}
+        <p class="project-subtitle">
+        ${project.subtitle}
+        </p>
+      </div>
+ <div class="project-hero">
+            <img src="${project.image_url}" alt="${project.title}" />
+        </div>
+
+         <div class="project-content">
+            <div class="project-info">
+                <h3>ABOUT THE PROJECT</h3>
+                <div class="project-description">
+                    <p>
+                       ${project.description}
+                    </p>                
+                </div>
+
+                <div class="project-features">
+                    <h4>KEY FEATURES</h4>
+                   <ul>
+    ${project.features
+      .split(",")
+      .map((tech) => `<li>${tech.trim()}</li>`)
+      .join("")}
+  </ul>
+                </div>
+
+                <div class="project-tech">
+                    <h4>TECHNOLOGIES USED</h4>
+                    <ul>
+    ${project.technologies
+      .split(",")
+      .map((tech) => `<li>${tech.trim()}</li>`)
+      .join("")}
+  </ul>
+                </div>
+            </div>
+
+            <div class="project-sidebar">
+                <div class="project-card">
+                    <h3>PROJECT DETAILS</h3>
+                    <div class="project-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <div>
+                                <strong>Release Date</strong>
+                                <p>${project.release_date}</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-code-branch"></i>
+                            <div>
+                                <strong>Development Time</strong>
+                                <p>${project.development_time}</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <strong>Team</strong>
+                                <p>${project.team}</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-tags"></i>
+                            <div>
+                                <strong>Genre</strong>
+                                <p>${project.genre}</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-gamepad"></i>
+                            <div>
+                                <strong>Platforms</strong>
+                                <p>${project.platforms}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <h3>PROJECT LINKS</h3>
+                    <div class="project-links">
+                        <a href="game.html?slug=${project.slug}" class="project-link">
+                            <i class="fas fa-play-circle"></i> Play Online
+                        </a>
+                        <a href="#" class="project-link">
+                            <i class="fab fa-github"></i> Source Code
+                        </a>
+                        <!-- <a href="#" class="project-link">
+                            <i class="fas fa-download"></i> Download
+                        </a> -->
+                        <a href="#" class="project-link">
+                            <i class="fas fa-video"></i> Gameplay Trailer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+      `;
+
+          container.appendChild(item);
+        });
+      }
+
+      let allProjects = [];
+      let projectsToShow = [];
+
+      async function loadProjectsAndRender() {
+        try {
+          const response = await fetch("/api/projects");
+          allProjects = await response.json();
+
+          // Misalnya ambil project berdasarkan ID dari query URL
+          const params = new URLSearchParams(window.location.search);
+          const projectId = parseInt(params.get("id"), 10);
+
+          projectsToShow = allProjects.filter((p) => p.id === projectId);
+          renderProjects();
+        } catch (error) {
+          console.error("❌ Gagal load project:", error);
+        }
+      }
+
+      loadProjectsAndRender();
+
+      //   renderProjects();
+    </script>
+  </body>
+</html>

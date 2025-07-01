@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - SamDev</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Press Start 2P", monospace;
+        background-color: #111;
+        color: #0f0;
+        margin: 0;
+        display: flex;
+        height: 100vh;
+      }
+
+      .sidebar {
+        width: 220px;
+        background-color: #000;
+        border-right: 2px solid #0f0;
+        padding: 20px;
+      }
+
+      .sidebar h2 {
+        font-size: 12px;
+        margin-bottom: 20px;
+        text-shadow: 0 0 5px #0f0;
+      }
+
+      .menu a {
+        display: block;
+        color: #0f0;
+        text-decoration: none;
+        margin: 10px 0;
+        font-size: 10px;
+        cursor: pointer;
+      }
+
+      .menu a.active {
+        background-color: #0f0;
+        color: #000;
+        padding-left: 5px;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+      }
+
+      header .refresh-btn {
+        margin-left: 10px;
+      }
+
+      .refresh-btn {
+        background-color: transparent;
+        color: #0f0;
+        border: 1px solid #0f0;
+        padding: 5px 10px;
+        font-family: "Press Start 2P";
+        cursor: pointer;
+        font-size: 10px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #222;
+      }
+
+      th,
+      td {
+        border: 1px solid #0f0;
+        padding: 10px;
+        text-align: left;
+        font-size: 10px;
+      }
+
+      th {
+        background-color: #333;
+      }
+
+      .section {
+        display: none;
+      }
+
+      .section.active {
+        display: block;
+      }
+      .user-table button {
+        margin-right: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>🕹️ Sam Dev</h2>
+      <div class="menu">
+        <a class="active" onclick="showSection('users')">👤 Users</a>
+        <a onclick="showSection('projects')">🎮 Projects</a>
+        <a onclick="showSection('assets')">📦 Assets</a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- === Users Section === -->
+      <div class="section active" id="users">
+        <header>
+          <h1>📊 USERS</h1>
+          <div>
+            <!-- <button class="refresh-btn" onclick="fetchUsers()">
+              🔄 Refresh
+            </button> -->
+            <button class="refresh-btn" onclick="addUser()">➕ Add User</button>
+          </div>
+        </header>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- === Projects Section === -->
+      <div class="section" id="projects">
+        <header>
+          <h1>🎮 PROJECTS</h1>
+          <div>
+            <button class="refresh-btn" onclick="addProject()">
+              ➕ Add Project
+            </button>
+          </div>
+        </header>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Genre</th>
+              <th>Release</th>
+              <th>Platforms</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="projectTableBody">
+            <!-- <tr>
+              <td>1</td>
+              <td>Space Adventure</td>
+              <td>Shooter, Arcade</td>
+              <td>Oct 12, 2023</td>
+              <td>Web, Windows</td>
+              <td>
+                <button>✏️</button>
+                <button>🗑️</button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Match-3 Gem</td>
+              <td>Puzzle</td>
+              <td>Jul 8, 2024</td>
+              <td>Web</td>
+              <td>
+                <button>✏️</button>
+                <button>🗑️</button>
+              </td>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- === Assets Section (Placeholder) === -->
+      <div class="section" id="assets">
+        <header><h1>📦 ASSETS</h1></header>
+        <p>Coming soon...</p>
+      </div>
+    </div>
+
+    <script>
+      async function fetchUsers() {
+        try {
+          const response = await fetch("/api/users");
+          const users = await response.json();
+          const tbody = document.getElementById("userTableBody");
+          tbody.innerHTML = "";
+          users.forEach((user) => {
+            const row = `<tr>
+          <td>${user.id}</td>
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+          <td>
+            <button onclick="editUser(${user.id}, '${user.name}', '${user.email}')">✏️ Edit</button>
+            <button onclick="deleteUser(${user.id})">🗑️ Delete</button>
+          </td>
+        </tr>`;
+            tbody.innerHTML += row;
+          });
+        } catch (err) {
+          console.error("❌ Error ambil user:", err);
+        }
+      }
+
+      async function editUser(id, currentName, currentEmail) {
+        const newName = prompt("Edit nama:", currentName);
+        if (newName === null) return;
+
+        const newEmail = prompt("Edit email:", currentEmail);
+        if (newEmail === null) return;
+
+        try {
+          const response = await fetch(`/users/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: newName, email: newEmail }),
+          });
+
+          if (!response.ok) throw new Error("Gagal update user");
+
+          alert("✅ User berhasil diupdate");
+          fetchUsers();
+        } catch (err) {
+          console.error("❌ Gagal update:", err);
+          alert("❌ Terjadi kesalahan saat update");
+        }
+      }
+
+      async function deleteUser(id) {
+        if (!confirm("Apakah kamu yakin ingin menghapus user ini?")) return;
+
+        try {
+          const response = await fetch(`/users/${id}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) throw new Error("Gagal hapus user");
+
+          alert("🗑️ User berhasil dihapus");
+          fetchUsers();
+        } catch (err) {
+          console.error("❌ Gagal hapus:", err);
+          alert("❌ Terjadi kesalahan saat menghapus user");
+        }
+      }
+
+      async function addUser() {
+        const name = prompt("Masukkan nama user:");
+        if (!name) return;
+
+        const email = prompt("Masukkan email user:");
+        if (!email) return;
+
+        try {
+          const response = await fetch("/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email }),
+          });
+
+          if (!response.ok) throw new Error("Gagal menambah user");
+
+          alert("✅ User berhasil ditambahkan!");
+          fetchUsers();
+        } catch (err) {
+          console.error("❌ Gagal tambah user:", err);
+          alert("❌ Terjadi kesalahan saat menambah user");
+        }
+      }
+
+      async function fetchProjects() {
+        try {
+          const response = await fetch("/api/projects");
+          const projects = await response.json();
+          const tbody = document.getElementById("projectTableBody");
+          tbody.innerHTML = "";
+          projects.forEach((project) => {
+            const row = `<tr>
+      <td>${project.id}</td>
+      <td>${project.title}</td>
+      <td>${project.genre}</td>
+      <td>${project.release_date}</td>
+      <td>${project.platforms}</td>
+      <td>
+        <button onclick="editProject(${project.id})">✏️ Edit</button>
+        <button onclick="deleteProject(${project.id})">🗑️ Delete</button>
+      </td>
+    </tr>`;
+            tbody.innerHTML += row;
+          });
+        } catch (err) {
+          console.error("❌ Gagal fetch project:", err);
+        }
+      }
+
+      async function addProject() {
+        const title = prompt("Judul Project:");
+        if (!title) return;
+
+        const subtitle = prompt("Subjudul:");
+        const image_url = prompt("URL Gambar:");
+        const description = prompt("Deskripsi:");
+        const features = prompt("Fitur (pisahkan dengan koma):");
+        const technologies = prompt("Teknologi (pisahkan dengan koma):");
+        const release_date = prompt("Tanggal Rilis (YYYY-MM-DD):");
+        const development_time = prompt("Waktu Pengembangan:");
+        const team = prompt("Tim:");
+        const genre = prompt("Genre:");
+        const platforms = prompt("Platform:");
+        const play_url = prompt("URL Main Game:");
+        const source_code_url = prompt("URL Source Code:");
+        const trailer_url = prompt("URL Trailer:");
+
+        try {
+          const response = await fetch("/projects", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title,
+              subtitle,
+              image_url,
+              description,
+              features,
+              technologies,
+              release_date,
+              development_time,
+              team,
+              genre,
+              platforms,
+              play_url,
+              source_code_url,
+              trailer_url,
+            }),
+          });
+
+          if (!response.ok) throw new Error("Gagal menambahkan project");
+
+          alert("✅ Project berhasil ditambahkan!");
+          fetchProjects(); // reload project list
+        } catch (err) {
+          console.error("❌ Gagal tambah project:", err);
+          alert("❌ Terjadi kesalahan saat menambah project");
+        }
+      }
+
+      async function deleteProject(id) {
+        const confirmed = confirm(
+          "Apakah kamu yakin ingin menghapus project ini?"
+        );
+        if (!confirmed) return;
+
+        try {
+          const response = await fetch(`/api/projects/${id}`, {
+            method: "DELETE",
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            alert("✅ Project berhasil dihapus");
+            fetchProjects(); // refresh table
+          } else {
+            alert("❌ Gagal menghapus project");
+          }
+        } catch (err) {
+          console.error("❌ Gagal hapus project:", err);
+          alert("❌ Terjadi kesalahan saat menghapus project");
+        }
+      }
+
+      function showSection(id) {
+        document
+          .querySelectorAll(".section")
+          .forEach((el) => el.classList.remove("active"));
+        document
+          .querySelectorAll(".menu a")
+          .forEach((el) => el.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        document
+          .querySelector(`.menu a[onclick*="${id}"]`)
+          .classList.add("active");
+
+        if (id === "projects") fetchProjects();
+      }
+
+      fetchUsers();
+    </script>
+  </body>
+</html>
