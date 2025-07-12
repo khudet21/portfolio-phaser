@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - SamDev</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="Css/dashboard.css" />
+    <style>
+      .hidden {
+        display: none;
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2>🕹️ Sam Dev</h2>
+      <div class="menu">
+        <a class="active" onclick="showSection('users')">👤 Users</a>
+        <a onclick="showSection('projects')">🎮 Projects</a>
+        <a onclick="showSection('assets')">📦 Assets</a>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="section active" id="users">
+        <header>
+          <h1>📊 USERS</h1>
+          <button class="refresh-btn" onclick="openUserForm()">
+            ➕ Add User
+          </button>
+        </header>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="section" id="projects">
+        <header>
+          <h1>🎮 PROJECTS</h1>
+          <button class="refresh-btn" onclick="openProjectModal()">
+            ➕ Add Project
+          </button>
+        </header>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Genre</th>
+              <th>Release</th>
+              <th>Platforms</th>
+              <th>Action</th>
+            </tr>
+          </thead>  
+          <tbody id="projectTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="section" id="assets">
+        <header><h1>📦 ASSETS</h1></header>
+        <p>Coming soon...</p>
+      </div>
+    </div>
+
+    <div id="user-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeUserForm()">&times;</span>
+        <h2>Tambah User</h2>
+        <form id="add-user-form">
+          <input type="text" id="name" placeholder="Nama User" required />
+          <input type="email" id="email" placeholder="Email User" required />
+          <button type="submit">Tambah</button>
+        </form>
+        <div id="add-user-status"></div>
+      </div>
+    </div>
+
+    <div id="projectModal" class="modal">
+      <div class="modal-content">
+        <h2>➕ Tambah Project</h2>
+        <form id="projectForm">
+          <input name="title" placeholder="Judul" required />
+          <input name="subtitle" placeholder="Subjudul" />
+          <input name="image_url" placeholder="URL Gambar" />
+          <input name="description" placeholder="Deskripsi" />
+          <input name="features" placeholder="Fitur (pisah koma)" />
+          <input name="technologies" placeholder="Teknologi (pisah koma)" />
+          <input name="release_date" type="date"/>
+          <input name="development_time" placeholder="Waktu Pengembangan" />
+          <input name="team" placeholder="Tim" />
+          <input name="genre" placeholder="Genre" />
+          <input name="platforms" placeholder="Platform" />
+          <input name="source_code_url" placeholder="URL Source Code" />
+          <input name="trailer_url" placeholder="URL Trailer" />
+          <input name="slug" placeholder="Slug unik" />
+          <select name="physics">
+            <option value="arcade">arcade</option>
+            <option value="matter">matter</option>
+          </select>
+          <textarea
+            name="logic_js"
+            placeholder="Logic JS (opsional)"
+          ></textarea>
+          <div>
+            <button type="button" onclick="closeProjectModal()">Batal</button>
+            <button type="submit">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="JS/dashboard.js"></script>
+  </body>
+</html>
