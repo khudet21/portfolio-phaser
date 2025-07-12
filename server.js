@@ -228,39 +228,15 @@ app.get("/asset/:id", async (req, res) => {
 });
 
 app.get("/game/:slug", async (req, res) => {
-  const slug = req.params.slug;
+  const [rows] = await db.query("SELECT * FROM projects WHERE slug = ?", [
+    req.params.slug,
+  ]);
+  if (rows.length === 0)
+    return res.status(404).json({ error: "Game not found" });
 
-  const sql = `
-    SELECT p.id, p.logic_js, p.physics, p.spine, a.id AS asset_id, a.type, a.key
-    FROM projects p
-    LEFT JOIN project_assets a ON p.id = a.project_id
-    WHERE p.slug = ?
-  `;
-
-  try {
-    const [results] = await db.query(sql, [slug]);
-    if (results.length === 0)
-      return res.status(404).json({ error: "Game not found" });
-
-    const { logic_js, physics, spine } = results[0];
-    const assets = results
-      .filter((r) => r.asset_id)
-      .map((row) => ({
-        type: row.type,
-        key: row.key,
-        url: `/asset/${row.asset_id}`,
-      }));
-
-    res.json({
-      logic: logic_js || "",
-      physics: physics || "arcade",
-      spine: !!spine,
-      assets,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-    console.error(error);
-  }
+  res.json({
+    fullCode: rows[0].logic_js, // ini adalah string JavaScript lengkap
+  });
 });
 
 app.get("/", (req, res) => {
