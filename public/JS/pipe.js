@@ -49,16 +49,33 @@ function preload() {
 }
 
 function create() {
-  X_POSITION = {
+  function shuffle(array) {
+    let currentIndex = array.length;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+      // Pick a remaining element...
+      let randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex],
+        array[currentIndex],
+      ];
+    }
+  }
+
+  let X_POSITION = {
     LEFT: 0,
-    CENTER: game.canvas.width / 2,
-    RIGHT: game.canvas.width,
+    CENTER: 1024 / 2,
+    RIGHT: 1024,
   };
 
-  Y_POSITION = {
+  let Y_POSITION = {
     TOP: 0,
-    CENTER: game.canvas.height / 2,
-    BOTTOM: game.canvas.height,
+    CENTER: 768 / 2,
+    BOTTOM: 768,
   };
 
   let posLumut = [
@@ -582,6 +599,7 @@ function create() {
   spawnBigPipe();
 }
 
+
 //Animation
 // function create(){
 
@@ -647,7 +665,7 @@ function create() {
 
 function update() {
   let myScene = this;
-  console.log("update terpanggil");
+  // console.log("update terpanggil");
   // setTimeout(function () {
   //     if (myScene.level === 0 && !myScene.hasScheduled) {
   //         myScene.level = 1;

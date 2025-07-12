@@ -21,6 +21,7 @@
 
   // Set your Global Variable here ..
 
+  
   // Siapkan loader preload dengan asset
   const preload = function () {
     if (Array.isArray(gameData.assets)) {
