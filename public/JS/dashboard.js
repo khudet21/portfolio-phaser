@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const form = e.target;
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
-      
+
       console.log("Data yang dikirim:", data);
 
       // Optional: ubah string fitur/teknologi menjadi format yang diinginkan (misal array atau string saja)
