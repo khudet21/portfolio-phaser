@@ -197,3 +197,61 @@ function openProjectModal() {
 function closeProjectModal() {
   document.getElementById("projectModal").style.display = "none";
 }
+
+// Ambil daftar slug dari server
+fetch("/slugs")
+  .then((res) => res.json())
+  .then((slugs) => {
+    const select = document.getElementById("slugSelect");
+    slugs.forEach(({ slug }) => {
+      const option = document.createElement("option");
+      option.value = slug;
+      option.textContent = slug;
+      select.appendChild(option);
+    });
+  });
+
+async function loadImages() {
+  const res = await fetch("/images");
+  const images = await res.json();
+
+  const tbody = document.querySelector("#imageTable tbody");
+  tbody.innerHTML = "";
+
+  for (const img of images) {
+    const tr = document.createElement("tr");
+
+    const nameTd = document.createElement("td");
+    nameTd.textContent = img.name;
+
+    const imgTd = document.createElement("td");
+    const image = document.createElement("img");
+    image.src = `/image/${img.id}`;
+    image.style.maxHeight = "50px";
+    imgTd.appendChild(image);
+
+    const slugTd = document.createElement("td"); // ✅ kolom baru
+    slugTd.textContent = img.slug || "-";
+
+    const actionTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.textContent = "Hapus";
+    btn.onclick = async () => {
+      if (confirm("Yakin mau hapus gambar ini?")) {
+        await fetch(`/image/${img.id}`, { method: "DELETE" });
+        loadImages();
+      }
+    };
+    actionTd.appendChild(btn);
+
+    tr.appendChild(nameTd);
+    tr.appendChild(imgTd);
+    tr.appendChild(slugTd); // ✅ masukkan slug di sini
+    tr.appendChild(actionTd);
+    tbody.appendChild(tr);
+  }
+}
+
+
+// Panggil saat halaman dimuat
+loadImages();

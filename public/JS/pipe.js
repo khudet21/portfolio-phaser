@@ -68,14 +68,14 @@ function create() {
 
   let X_POSITION = {
     LEFT: 0,
-    CENTER: 1024 / 2,
-    RIGHT: 1024,
+    CENTER: game.canvas.width / 2,
+    RIGHT: game.canvas.width,
   };
 
   let Y_POSITION = {
     TOP: 0,
-    CENTER: 768 / 2,
-    BOTTOM: 768,
+    CENTER: game.canvas.height / 2,
+    BOTTOM: game,
   };
 
   let posLumut = [

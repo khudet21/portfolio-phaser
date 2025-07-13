@@ -12,10 +12,12 @@
     if (!res.ok) throw new Error("Gagal mengambil game.");
     const gameData = await res.json();
 
-    // Asumsikan gameData.fullCode berisi seluruh kode game dalam string
+    // Inject slug ke dalam kode sebelum dijalankan
+    const fullCodeWithSlug = gameData.fullCode.replace(/\[SLUG\]/g, slug);
+
     const gameScript = document.createElement("script");
     gameScript.type = "text/javascript";
-    gameScript.textContent = gameData.fullCode;
+    gameScript.textContent = fullCodeWithSlug;
     document.body.appendChild(gameScript);
 
   } catch (err) {

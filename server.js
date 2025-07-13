@@ -3,8 +3,15 @@ const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
+const multer = require("multer");
+// const mysql = require("mysql2/promise");
+const path = require("path");
+
 const app = express();
 const port = 3000;
+
+const upload = multer({ storage: multer.memoryStorage() });
+app.use(express.static(path.join(__dirname, "public")));
 
 // ✅ Aktifkan CORS lebih awal
 app.use(
@@ -37,6 +44,7 @@ app.use((req, res, next) => {
   next();
 });
 
+//USERS
 app.get("/api/users", async (req, res) => {
   console.log("📥 GET /api/users dipanggil");
   try {
@@ -211,20 +219,90 @@ app.post("/api/projects", async (req, res) => {
 });
 
 // POST upload asset
-app.get("/asset/:id", async (req, res) => {
-  const id = req.params.id;
+app.post("/upload", upload.single("image"), async (req, res) => {
+  if (!req.file || !req.body.slug)
+    return res.status(400).send("❌ File atau slug tidak ditemukan");
+
+  const { originalname, mimetype, buffer } = req.file;
+  const { slug } = req.body;
+
   try {
-    const [results] = await db.query(
-      "SELECT mime_type, data FROM project_assets WHERE id = ?",
-      [id]
+    await db.query(
+      "INSERT INTO images (name, type, data, slug) VALUES (?, ?, ?, ?)",
+      [originalname, mimetype, buffer, slug]
     );
-    if (results.length === 0) return res.status(404).send("Asset not found");
-    const { mime_type, data } = results[0];
-    res.setHeader("Content-Type", mime_type);
-    res.send(data);
+    res.redirect("/upload.html");
   } catch (err) {
-    res.status(500).send("Error saat ambil asset");
+    console.error(err);
+    res.status(500).send("❌ Gagal menyimpan ke database");
   }
+});
+
+app.get("/images", async (req, res) => {
+  try {
+    const [images] = await db.query("SELECT id, name, type, slug FROM images");
+    res.json(images);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal mengambil gambar");
+  }
+});
+
+// Endpoint untuk menampilkan gambar berdasarkan ID
+app.get("/image/:id", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM images WHERE id = ?", [
+      req.params.id,
+    ]);
+    if (rows.length === 0)
+      return res.status(404).send("Gambar tidak ditemukan");
+
+    const image = rows[0];
+    res.setHeader("Content-Type", image.type);
+    res.send(image.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal menampilkan gambar");
+  }
+});
+
+// Endpoint untuk hapus
+app.delete("/image/:id", async (req, res) => {
+  try {
+    const [result] = await db.query("DELETE FROM images WHERE id = ?", [
+      req.params.id,
+    ]);
+    if (result.affectedRows === 0)
+      return res.status(404).send("Gambar tidak ditemukan");
+    res.send("Gambar berhasil dihapus");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal menghapus gambar");
+  }
+});
+
+app.get("/image/:slug/:name", async (req, res) => {
+  const { slug, name } = req.params;
+  try {
+    const [rows] = await db.query(
+      "SELECT * FROM images WHERE slug = ? AND name = ?",
+      [slug, name]
+    );
+    if (rows.length === 0)
+      return res.status(404).send("Gambar tidak ditemukan");
+
+    const image = rows[0];
+    res.setHeader("Content-Type", image.type);
+    res.send(image.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal menampilkan gambar");
+  }
+});
+
+app.get("/slugs", async (req, res) => {
+  const [rows] = await db.query("SELECT slug FROM projects");
+  res.json(rows);
 });
 
 app.get("/game/:slug", async (req, res) => {

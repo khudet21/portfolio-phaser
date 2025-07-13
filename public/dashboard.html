@@ -94,7 +94,27 @@
 
       <div class="section" id="assets">
         <header><h1>📦 ASSETS</h1></header>
-        <p>Coming soon...</p>
+        <!-- <p>Coming soon...</p> -->
+        <h1>Upload Gambar</h1>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+          <input type="file" name="image" required />
+          <button type="submit">Upload</button>
+          <select name="slug" id="slugSelect"></select>
+        </form>
+
+        <h2>Daftar Gambar</h2>
+        <table border="1" id="imageTable">
+          <thead>
+            <tr>
+              <th>Nama File</th>
+              <th>Preview</th>
+              <th>Slug</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
 
