@@ -500,3 +500,5 @@ window.addEventListener("load", () => {
 // Panggil saat halaman dimuat
 loadImages();
 loadSpriteSheet();
+
+
