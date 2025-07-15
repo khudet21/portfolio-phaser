@@ -3,8 +3,15 @@ const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
+const multer = require("multer");
+// const mysql = require("mysql2/promise");
+const path = require("path");
+
 const app = express();
 const port = 3000;
+
+const upload = multer({ storage: multer.memoryStorage() });
+app.use(express.static(path.join(__dirname, "public")));
 
 // ✅ Aktifkan CORS lebih awal
 app.use(
@@ -37,6 +44,7 @@ app.use((req, res, next) => {
   next();
 });
 
+//USERS
 app.get("/api/users", async (req, res) => {
   console.log("📥 GET /api/users dipanggil");
   try {
@@ -82,6 +90,23 @@ app.get("/api/projects/:id", async (req, res) => {
   }
 });
 
+app.get("/api/project-image/:id", async (req, res) => {
+  try {
+    const [results] = await db.query(
+      "SELECT image FROM projects WHERE id = ?",
+      [req.params.id]
+    );
+    if (results.length === 0 || !results[0].image) {
+      return res.status(404).send("Image not found");
+    }
+
+    res.setHeader("Content-Type", "image/png"); // atau image/jpeg jika sesuai
+    res.send(results[0].image); // langsung kirim binary image
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 // GET user by ID
 app.get("/users/:id", async (req, res) => {
   try {
@@ -120,9 +145,71 @@ app.put("/users/:id", async (req, res) => {
       email,
       req.params.id,
     ]);
-    res.send("User berhasil diupdate");
+    res.json({ message: "User berhasil diupdate" });
   } catch (err) {
     res.status(500).send(err);
+  }
+});
+
+// PUT update project
+app.put("/api/projects/:id", upload.single("image"), async (req, res) => {
+  try {
+    const {
+      title,
+      subtitle,
+      description,
+      features,
+      technologies,
+      slug,
+      release_date,
+      development_time,
+      platforms,
+      source_code,
+      trailer_url,
+      team,
+      logic_js,
+      genre,
+    } = req.body;
+
+    const imageBuffer = req.file ? req.file.buffer : null;
+
+    let query = `
+      UPDATE projects SET
+        title = ?, subtitle = ?, description = ?, features = ?, technologies = ?,
+        slug = ?, release_date = ?, development_time = ?, platforms = ?, source_code = ?,
+        trailer_url = ?, team = ?, logic_js = ?, genre = ?
+    `;
+
+    const values = [
+      title,
+      subtitle,
+      description,
+      features,
+      technologies,
+      slug,
+      release_date,
+      development_time,
+      platforms,
+      source_code,
+      trailer_url,
+      team,
+      logic_js,
+      genre,
+    ];
+
+    if (imageBuffer) {
+      query += `, image = ?`;
+      values.push(imageBuffer);
+    }
+
+    query += ` WHERE id = ?`;
+    values.push(req.params.id);
+
+    const [result] = await db.query(query, values);
+    res.json({ success: true, message: "Project berhasil diperbarui" });
+  } catch (error) {
+    console.error("Gagal update project:", error);
+    res.status(500).json({ success: false, message: "Gagal update project" });
   }
 });
 
@@ -139,50 +226,45 @@ app.delete("/users/:id", async (req, res) => {
 // DELETE project
 app.delete("/api/projects/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
+    // 1️⃣ Ambil slug dari project yang akan dihapus
+    const [projects] = await db.query(
+      "SELECT slug FROM projects WHERE id = ?",
+      [id]
+    );
+    if (projects.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Project not found" });
+    }
+    const slug = projects[0].slug;
+
+    // 2️⃣ Hapus project
     await db.query("DELETE FROM projects WHERE id = ?", [id]);
-    res.status(200).json({ success: true, message: "Project deleted" });
+
+    // 3️⃣ Hapus semua asset dari tabel images yang memiliki slug yang sama
+    await db.query("DELETE FROM images WHERE slug = ?", [slug]);
+
+    // 4️⃣ Sukses
+    res.status(200).json({
+      success: true,
+      message: `Project dan asset dengan slug '${slug}' dihapus`,
+    });
   } catch (error) {
-    console.error("❌ Error deleting project:", error.message, "↩️", error);
+    console.error("❌ Error deleting project & assets:", error.message);
     res
       .status(500)
       .json({ success: false, message: "Server error", detail: error.message });
   }
 });
 
-// POST project
-app.post("/api/projects", async (req, res) => {
+// POST project with image upload
+app.post("/api/projects", upload.single("image"), async (req, res) => {
   try {
     const {
       title,
       subtitle,
-      image_url,
-      description,
-      features,
-      technologies,
-      slug,
-      release_date,
-      development_time,
-      platforms,
-      source_code, // ✅ BUKAN source_code_url
-      trailer_url,
-      team,
-      physics,
-      logic_js,
-      genre,
-      play_url,
-    } = req.body;
-
-    const query = `
-  INSERT INTO projects
-  (title, subtitle, image_url, description, features, technologies, slug, release_date, development_time, platforms, source_code, trailer_url, team, physics, logic_js, genre, play_url)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`;
-
-    const values = [
-      title,
-      subtitle,
-      image_url,
       description,
       features,
       technologies,
@@ -193,11 +275,36 @@ app.post("/api/projects", async (req, res) => {
       source_code,
       trailer_url,
       team,
-      physics,
       logic_js,
       genre,
-      play_url,
+    } = req.body;
+
+    const image = req.file ? req.file.buffer : null; // ambil buffer file gambar
+
+    const query = `
+      INSERT INTO projects
+      (title, subtitle, image, description, features, technologies, slug, release_date, development_time, platforms, source_code, trailer_url, team, logic_js, genre)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+      title,
+      subtitle,
+      image,
+      description,
+      features,
+      technologies,
+      slug,
+      release_date,
+      development_time,
+      platforms,
+      source_code,
+      trailer_url,
+      team,
+      logic_js,
+      genre,
     ];
+
     const [result] = await db.query(query, values);
     res.json({
       success: true,
@@ -211,56 +318,102 @@ app.post("/api/projects", async (req, res) => {
 });
 
 // POST upload asset
-app.get("/asset/:id", async (req, res) => {
-  const id = req.params.id;
+app.post("/upload", upload.single("image"), async (req, res) => {
+  if (!req.file || !req.body.slug)
+    return res.status(400).send("❌ File atau slug tidak ditemukan");
+
+  const { originalname, mimetype, buffer } = req.file;
+  const { slug } = req.body;
+
   try {
-    const [results] = await db.query(
-      "SELECT mime_type, data FROM project_assets WHERE id = ?",
-      [id]
+    await db.query(
+      "INSERT INTO images (name, type, data, slug) VALUES (?, ?, ?, ?)",
+      [originalname, mimetype, buffer, slug]
     );
-    if (results.length === 0) return res.status(404).send("Asset not found");
-    const { mime_type, data } = results[0];
-    res.setHeader("Content-Type", mime_type);
-    res.send(data);
+    res.redirect("/dashboard.html#assets");
   } catch (err) {
-    res.status(500).send("Error saat ambil asset");
+    console.error(err);
+    res.status(500).send("❌ Gagal menyimpan ke database");
   }
 });
 
-app.get("/game/:slug", async (req, res) => {
-  const slug = req.params.slug;
-
-  const sql = `
-    SELECT p.id, p.logic_js, p.physics, p.spine, a.id AS asset_id, a.type, a.key
-    FROM projects p
-    LEFT JOIN project_assets a ON p.id = a.project_id
-    WHERE p.slug = ?
-  `;
-
+app.get("/images", async (req, res) => {
   try {
-    const [results] = await db.query(sql, [slug]);
-    if (results.length === 0)
-      return res.status(404).json({ error: "Game not found" });
-
-    const { logic_js, physics, spine } = results[0];
-    const assets = results
-      .filter((r) => r.asset_id)
-      .map((row) => ({
-        type: row.type,
-        key: row.key,
-        url: `/asset/${row.asset_id}`,
-      }));
-
-    res.json({
-      logic: logic_js || "",
-      physics: physics || "arcade",
-      spine: !!spine,
-      assets,
-    });
+    const [images] = await db.query("SELECT id, name, type, slug FROM images");
+    res.json(images);
   } catch (err) {
-    res.status(500).json({ error: err.message });
-    console.error(error);
+    console.error(err);
+    res.status(500).send("Gagal mengambil gambar");
   }
+});
+
+// Endpoint untuk menampilkan gambar berdasarkan ID
+app.get("/image/:id", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM images WHERE id = ?", [
+      req.params.id,
+    ]);
+    if (rows.length === 0)
+      return res.status(404).send("Gambar tidak ditemukan");
+
+    const image = rows[0];
+    res.setHeader("Content-Type", image.type);
+    res.send(image.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal menampilkan gambar");
+  }
+});
+
+// Endpoint untuk hapus
+app.delete("/image/:id", async (req, res) => {
+  try {
+    const [result] = await db.query("DELETE FROM images WHERE id = ?", [
+      req.params.id,
+    ]);
+    if (result.affectedRows === 0)
+      return res.status(404).send("Gambar tidak ditemukan");
+    res.send("Gambar berhasil dihapus");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal menghapus gambar");
+  }
+});
+
+app.get("/image/:slug/:name", async (req, res) => {
+  const { slug, name } = req.params;
+  try {
+    const [rows] = await db.query(
+      "SELECT * FROM images WHERE slug = ? AND name = ?",
+      [slug, name]
+    );
+    if (rows.length === 0)
+      return res.status(404).send("Gambar tidak ditemukan");
+
+    const image = rows[0];
+    res.setHeader("Content-Type", image.type);
+    res.send(image.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal menampilkan gambar");
+  }
+});
+
+app.get("/slugs", async (req, res) => {
+  const [rows] = await db.query("SELECT slug FROM projects");
+  res.json(rows);
+});
+
+app.get("/game/:slug", async (req, res) => {
+  const [rows] = await db.query("SELECT * FROM projects WHERE slug = ?", [
+    req.params.slug,
+  ]);
+  if (rows.length === 0)
+    return res.status(404).json({ error: "Game not found" });
+
+  res.json({
+    fullCode: rows[0].logic_js, // ini adalah string JavaScript lengkap
+  });
 });
 
 app.get("/", (req, res) => {

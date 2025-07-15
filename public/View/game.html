@@ -37,6 +37,29 @@
     <script src="../games/phaser.min.js"></script>
     <script src="../games/SpinePlugin.min.js"></script>
     <script src="../JS/script.js"></script>
+    <button
+      id="backButton"
+      style="
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        padding: 10px 15px;
+        font-family: 'Press Start 2P', monospace;
+        background-color: black;
+        color: #00ff00;
+        border: 2px solid #00ff00;
+        cursor: pointer;
+      "
+    >
+      ← Kembali
+    </button>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/@esotericsoftware/spine-phaser@3.1.0/dist/SpinePlugin.js"></script>
+  <script>
+    // Tambahkan event untuk tombol kembali
+    document.getElementById("backButton").addEventListener("click", () => {
+      window.history.back();
+    });
+  </script>
 </html>
