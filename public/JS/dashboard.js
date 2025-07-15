@@ -288,6 +288,17 @@ function clearProjectForm() {
   if (oldPreview) oldPreview.remove(); // Hapus preview gambar
 }
 
+function openAssetsMenu() {
+  document.getElementById("main-menu").classList.add("hidden");
+  document.getElementById("assets-submenu").classList.remove("hidden");
+  showSection("images"); // Tampilkan section images saat menu dibuka
+}
+
+function backToMainMenu() {
+  document.getElementById("assets-submenu").classList.add("hidden");
+  document.getElementById("main-menu").classList.remove("hidden");
+}
+
 // Ambil daftar slug dari server
 fetch("/slugs")
   .then((res) => res.json())
@@ -345,6 +356,53 @@ async function loadImages() {
     tr.appendChild(slugTd); // ✅ masukkan slug di sini
     tr.appendChild(actionTd);
     tbody.appendChild(tr);
+  }
+}
+
+//contoh data sprite sheet
+const arrsprite = [
+  {
+    filename: "hero_run.png",
+    url: "../asset/flapAsset/BG1.png",
+    slug: "hero-run",
+    width: 64,
+    height: 64,
+  },
+  {
+    filename: "enemy_walk.png",
+    url: "../asset/flapAsset/BG2.png",
+    slug: "hero-run",
+    width: 64,
+    height: 64,
+  },
+  {
+    filename: "background_tiles.png",
+    url: "../asset/flapAsset/BG3.png",
+    slug: "hero-run",
+    width: 256,
+    height: 256,
+  },
+];
+
+async function loadSpriteSheet() {
+  // const res = await fetch("/spritesheet");
+  // const images = await res.json();
+  const tbody = document.querySelector("#spritesheetTable tbody");
+  tbody.innerHTML = "";
+
+  for (const sprite of arrsprite) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${sprite.filename}</td>
+      <td><img src="${sprite.url}" alt="preview" width="64" /></td>
+      <td>${sprite.slug}</td>
+      <td>${sprite.width} x ${sprite.height}</td> <!-- Gabungan ukuran -->
+      <td>
+        <button onclick="editSprite('${sprite.slug}')">✏️</button>
+        <button onclick="deleteSprite('${sprite.slug}')">🗑️</button>
+      </td>
+    `;
+    tbody.appendChild(row);
   }
 }
 
@@ -441,3 +499,4 @@ window.addEventListener("load", () => {
 
 // Panggil saat halaman dimuat
 loadImages();
+loadSpriteSheet();

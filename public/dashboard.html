@@ -1,128 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard - SamDev</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
-      rel="stylesheet"
-    />
 
-    <!-- tinyMCE -->
-    <!-- <script
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - SamDev</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+
+  <!-- tinyMCE -->
+  <!-- <script
       src="https://cdn.tiny.cloud/1/ydly6rbhyulpklyti5xsu56zf3ay54y6w0t2ctf99refrebm/tinymce/6/tinymce.min.js"
       referrerpolicy="origin"
     ></script> -->
 
-    <link rel="stylesheet" href="Css/dashboard.css" />
-    <!-- Highlight.js CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
-    />
+  <link rel="stylesheet" href="Css/dashboard.css" />
+  <!-- Highlight.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
 
-    <!-- CodeMirror Core -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+  <!-- CodeMirror Core -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
 
-    <!-- JavaScript Mode -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+  <!-- JavaScript Mode -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
 
-    <!-- Dracula Theme -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css"
-    />
+  <!-- Dracula Theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css" />
 
-    <!-- Code Folding -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.css"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/brace-fold.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/comment-fold.min.js"></script>
-  </head>
+  <!-- Code Folding -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/brace-fold.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/comment-fold.min.js"></script>
+</head>
 
-  <body>
-    <div class="sidebar">
-      <h2>🕹️ Sam Dev</h2>
-      <div class="menu">
-        <a class="active" onclick="showSection('users')">👤 Users</a>
-        <a onclick="showSection('projects')">🎮 Projects</a>
-        <a onclick="showSection('assets')">📦 Assets</a>
-      </div>
+<body>
+  <div class="sidebar">
+    <h2>🕹️ Sam Dev</h2>
+    <div class="menu" id="main-menu">
+      <a class="active" onclick="showSection('users')">👤 Users</a>
+      <a onclick="showSection('projects')">🎮 Projects</a>
+      <a onclick="openAssetsMenu()">📦 Assets</a>
+    </div>
+    <!-- Submenu Assets -->
+    <div class="menu hidden" id="assets-submenu">
+      <a onclick="showSection('images')">🖼️ Image</a>
+      <a onclick="showSection('spritesheet')">🧩 SpriteSheet</a>
+      <a onclick="showSection('audio')">🔊 Audio</a>
+      <a onclick="showSection('particle')">✨ Particle</a>
+      <a onclick="showSection('spine')">🦴 Spine</a>
+      <a onclick="backToMainMenu()">🔙 Kembali</a>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="section" id="users">
+      <header>
+        <h1>📊 USERS</h1>
+        <button class="refresh-btn" onclick="openUserForm()">
+          ➕ Add User
+        </button>
+      </header>
+      <table>
+        <thead>
+          <tr>
+            <!-- <th>ID</th> -->
+            <th>Name</th>
+            <th>Email</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
     </div>
 
-    <div class="main-content">
-      <div class="section" id="users">
-        <header>
-          <h1>📊 USERS</h1>
-          <button class="refresh-btn" onclick="openUserForm()">
-            ➕ Add User
-          </button>
-        </header>
-        <table>
-          <thead>
-            <tr>
-              <!-- <th>ID</th> -->
-              <th>Name</th>
-              <th>Email</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="userTableBody"></tbody>
-        </table>
-      </div>
+    <div class="section" id="projects">
+      <header>
+        <h1>🎮 PROJECTS</h1>
+        <button class="refresh-btn" onclick="openProjectModal()">
+          ➕ Add Project
+        </button>
+      </header>
+      <table>
+        <thead>
+          <tr>
+            <!-- <th>ID</th> -->
+            <th>Title</th>
+            <th>Genre</th>
+            <th>Slug</th>
+            <th>Description</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="projectTableBody"></tbody>
+      </table>
+    </div>
 
-      <div class="section" id="projects">
-        <header>
-          <h1>🎮 PROJECTS</h1>
-          <button class="refresh-btn" onclick="openProjectModal()">
-            ➕ Add Project
-          </button>
-        </header>
-        <table>
-          <thead>
-            <tr>
-              <!-- <th>ID</th> -->
-              <th>Title</th>
-              <th>Genre</th>
-              <th>Slug</th>
-              <th>Description</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="projectTableBody"></tbody>
-        </table>
-      </div>
+    <div class="section" id="images">
+      <header>
+        <h1>🖼️ Images</h1>
+        <button class="refresh-btn" onclick="openAssetModal()">
+          ➕ Add Image
+        </button>
+      </header>
 
-      <div class="section" id="assets">
-        <header>
-          <h1>📦 ASSETS</h1>
-          <button class="refresh-btn" onclick="openAssetModal()">
-            ➕ Add Asset
-          </button>
-        </header>
-        <!-- <p>Coming soon...</p> -->
-        <!-- <h2>Daftar Gambar</h2> -->
-        <table border="1" id="imageTable">
-          <thead>
-            <tr>
-              <th>Nama File</th>
-              <th>Preview</th>
-              <th>Slug</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <table border="1" id="imageTable">
+        <thead>
+          <tr>
+            <th>Nama File</th>
+            <th>Preview</th>
+            <th>Slug</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="section" id="spritesheet">
+      <header>
+        <h1>🧩 Spritesheet</h1>
+        <button class="refresh-btn" onclick="openAssetModal()">
+          ➕ Add Spritesheet
+        </button>
+      </header>
+      <table border="1" id="spritesheetTable">
+        <thead>
+          <tr>
+            <th>Nama File</th>
+            <th>Preview</th>
+            <th>Slug</th>
+            <th>Ukuran</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="section" id="audio">
+      <header>
+        <h1>🔊 Audio</h1>
+        <button class="refresh-btn" onclick="openAssetModal()">
+          ➕ Add Audio
+        </button>
+      </header>
+      <p>Coming soon...</p>
+    </div>
+
+    <div class="section" id="particle">
+      <header>
+        <h1>✨Particle</h1>
+        <button class="refresh-btn" onclick="openAssetModal()">
+          ➕ Add Particle
+        </button>
+      </header>
+      <p>Coming soon...</p>
+    </div>
+
+    <div class="section" id="spine">
+      <header>
+        <h1>🦴 Spine</h1>
+        <button class="refresh-btn" onclick="openAssetModal()">
+          ➕ Add Spine
+        </button>
+      </header>
+      <p>Coming soon...</p>
     </div>
 
     <div id="user-modal" class="modal">
@@ -159,18 +204,10 @@
           <input name="trailer_url" placeholder="URL Trailer" />
           <input name="slug" placeholder="Slug unik" />
           <div class="editor-container">
-            <button
-              type="button"
-              class="fullscreen-toggle"
-              onclick="toggleFullScreenEditor()"
-            >
+            <button type="button" class="fullscreen-toggle" onclick="toggleFullScreenEditor()">
               ⛶
             </button>
-            <textarea
-              id="editor"
-              name="logic_js"
-              placeholder="Logic JS (opsional)"
-            ></textarea>
+            <textarea id="editor" name="logic_js" placeholder="Logic JS (opsional)"></textarea>
           </div>
           <div>
             <button type="submit">Simpan</button>
@@ -183,12 +220,7 @@
       <div class="modal-content">
         <span class="close" onclick="closeAssetModal()">&times;</span>
         <h2>Asset</h2>
-        <form
-          action="/upload"
-          method="POST"
-          enctype="multipart/form-data"
-          id="assetForm"
-        >
+        <form action="/upload" method="POST" enctype="multipart/form-data" id="assetForm">
           <input type="file" name="image" required />
           <select name="slug" id="slugSelect"></select>
           <button type="submit">Upload</button>
@@ -201,5 +233,6 @@
       hljs.highlightAll();
     </script>
     <script src="JS/dashboard.js"></script>
-  </body>
+</body>
+
 </html>
