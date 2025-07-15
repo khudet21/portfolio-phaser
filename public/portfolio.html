@@ -226,10 +226,6 @@
               />
               <span class="skill-name">Phaser.js</span>
             </li>
-            <!-- <li class="skill-item">
-                        <img src="https://cdn3d.iconscout.com/3d/free/thumb/free-javascript-3d-icon-download-in-png-blend-fbx-gltf-file-formats--html-logo-vue-angular-coding-lang-pack-logos-icons-7577991.png?f=webp" alt="JavaScript" class="skill-icon">
-                        <span class="skill-name">JavaScript</span>
-                    </li> -->
             <li class="skill-item">
               <img
                 src="https://play-lh.googleusercontent.com/Hj20ybwfUn0f1MR-xRr1FJ-ysVdgxFU31GGicLr8DdFXoG5eCB88MeMJr990sRNIdA"
@@ -395,13 +391,13 @@
 
     <footer>
       <div class="social-links">
-        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
-        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+        <a href="https://github.com/khudet21" target="_blank" class="social-link"><i class="fab fa-github"></i></a>
+        <a href="https://linkedin.com/in/samsul-huda-0a2966268" target="_blank" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://x.com/sam_dev06" target="_blank" class="social-link"><i class="fab fa-twitter"></i></a>
+        <a href="https://www.youtube.com/@samdev06" target="_blank" class="social-link"><i class="fab fa-youtube"></i></a>
       </div>
       <p class="copyright">
-        &copy; 2024 Sam Dev Game Studio. All rights reserved.
+        &copy; 2024 Sam Dev Studio. All rights reserved.
       </p>
     </footer>
   </body>
@@ -434,35 +430,8 @@
         item.className = "project-item";
         item.innerHTML = `
         <div class="project-img-container">
-          <img src="${project.image_url}" alt="${
-          project.title
-        }" class="project-img" />
-          <div class="project-overlay">
-            <div class="project-tags">
-              ${project.technologies
-                .split(",")
-                .map(
-                  (tech) => `<span class="project-tag">${tech.trim()}</span>`
-                )
-                .join("")}
-            </div>
-          </div>
-        </div>
-        <div class="project-content">
-          <h3>${project.title}</h3>
-          <p>${project.subtitle}</p>
-          <a href="./Resource/View/project.html?id=${
-            project.id
-          }" class="project-link">
-            View Project <i class="fas fa-external-link-alt"></i>
-          </a>
-        </div>
-      `;
-        item.innerHTML = `
-        <div class="project-img-container">
-          <img src="${project.image_url}" alt="${
-          project.title
-        }" class="project-img" />
+          <img src="/api/project-image/${project.id}" alt="${project.title}" class="project-img" />
+
           <div class="project-overlay">
             <div class="project-tags">
               ${project.technologies

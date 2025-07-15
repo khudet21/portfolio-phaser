@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Code Editor dengan Dracula, Folding & Undo Per Aksi</title>
+
+    <!-- CodeMirror Core -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+
+    <!-- JavaScript Mode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+
+    <!-- Dracula Theme -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css"
+    />
+
+    <!-- Code Folding -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/comment-fold.min.js"></script>
+
+    <style>
+      body {
+        background: #282a36;
+        color: white;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .CodeMirror {
+        height: 400px;
+        border: 1px solid #444;
+        border-radius: 4px;
+      }
+      .fullscreen .CodeMirror {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 100% !important;
+        z-index: 9999;
+      }
+
+      .editor-container {
+        position: relative;
+      }
+
+      .fullscreen-toggle {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #44475a;
+        border: none;
+        color: white;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 12px;
+        cursor: pointer;
+        z-index: 10;
+      }
+      .fullscreen-toggle:hover {
+        background: #6272a4;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="myForm">
+      <div class="editor-container">
+        <button
+          type="button"
+          class="fullscreen-toggle"
+          onclick="toggleFullScreenEditor()"
+        >
+          ⛶
+        </button>
+        <textarea id="codeEditor" name="code"> </textarea>
+      </div>
+
+      <br /><br />
+      <button type="submit">Kirim</button>
+    </form>
+
+    <script>
+      const editor = CodeMirror.fromTextArea(
+        document.getElementById("codeEditor"),
+        {
+          lineNumbers: true,
+          mode: "javascript",
+          theme: "dracula",
+          indentUnit: 2,
+          indentWithTabs: false,
+          lineWrapping: true,
+          foldGutter: true,
+          gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        }
+      );
+
+      function toggleFullScreenEditor() {
+        const isFullscreen = document.body.classList.toggle("fullscreen");
+        editor.refresh();
+      }
+
+      // ESC to exit fullscreen
+      document.addEventListener("keydown", function (e) {
+        if (
+          e.key === "Escape" &&
+          document.body.classList.contains("fullscreen")
+        ) {
+          document.body.classList.remove("fullscreen");
+          editor.refresh();
+        }
+      });
+
+      // Set value on submit
+      document.getElementById("myForm").addEventListener("submit", function () {
+        document.getElementById("codeEditor").value = editor.getValue();
+      });
+
+      // Delay for undo checkpoint
+      let undoTimer = null;
+      editor.on("change", function () {
+        clearTimeout(undoTimer);
+        undoTimer = setTimeout(() => {
+          editor.doc.markClean();
+        }, 300);
+      });
+    </script>
+  </body>
+</html>

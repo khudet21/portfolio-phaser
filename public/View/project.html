@@ -24,7 +24,7 @@
     </header>
 
     <main class="project-detail" id="projectContainer">
-      <h3
+      <!-- <h3
         style="
           color: var(--primary);
           font-family: 'Press Start 2P', cursive;
@@ -89,11 +89,11 @@
             <i class="fas fa-search-plus"></i>
           </div>
         </div>
-      </div>
+      </div> -->
     </main>
 
     <!-- Lightbox -->
-    <div class="lightbox">
+    <!-- <div class="lightbox">
       <div class="lightbox-content">
         <img src="" alt="Project Screenshot" />
         <span class="lightbox-close">&times;</span>
@@ -106,18 +106,33 @@
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <footer>
       <div class="social-links">
-        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
-        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+        <a
+          href="https://github.com/khudet21"
+          target="_blank"
+          class="social-link"
+          ><i class="fab fa-github"></i
+        ></a>
+        <a
+          href="https://linkedin.com/in/samsul-huda-0a2966268"
+          target="_blank"
+          class="social-link"
+          ><i class="fab fa-linkedin-in"></i
+        ></a>
+        <a href="https://x.com/sam_dev06" target="_blank" class="social-link"
+          ><i class="fab fa-twitter"></i
+        ></a>
+        <a
+          href="https://www.youtube.com/@samdev06"
+          target="_blank"
+          class="social-link"
+          ><i class="fab fa-youtube"></i
+        ></a>
       </div>
-      <p class="copyright">
-        &copy; 2024 Sam Dev Game Studio. All rights reserved.
-      </p>
+      <p class="copyright">&copy; 2024 Sam Dev Studio. All rights reserved.</p>
     </footer>
 
     <script>
@@ -220,7 +235,9 @@
         </p>
       </div>
  <div class="project-hero">
-            <img src="${project.image_url}" alt="${project.title}" />
+            <img src="/api/project-image/${project.id}" alt="${
+            project.title
+          }" class="project-img" />
         </div>
 
          <div class="project-content">
@@ -303,13 +320,14 @@
                         }" class="project-link">
                             <i class="fas fa-play-circle"></i> Play Online
                         </a>
-                        <a href="#" class="project-link">
+                        <a href="${
+                          project.source_code
+                        }" target="_blanks" class="project-link">
                             <i class="fab fa-github"></i> Source Code
-                        </a>
-                        <!-- <a href="#" class="project-link">
-                            <i class="fas fa-download"></i> Download
-                        </a> -->
-                        <a href="#" class="project-link">
+                        </a>        
+                        <a href="${
+                          project.trailer_url
+                        }" target="_blanks" class="project-link">
                             <i class="fas fa-video"></i> Gameplay Trailer
                         </a>
                     </div>

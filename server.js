@@ -90,6 +90,23 @@ app.get("/api/projects/:id", async (req, res) => {
   }
 });
 
+app.get("/api/project-image/:id", async (req, res) => {
+  try {
+    const [results] = await db.query(
+      "SELECT image FROM projects WHERE id = ?",
+      [req.params.id]
+    );
+    if (results.length === 0 || !results[0].image) {
+      return res.status(404).send("Image not found");
+    }
+
+    res.setHeader("Content-Type", "image/png"); // atau image/jpeg jika sesuai
+    res.send(results[0].image); // langsung kirim binary image
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 // GET user by ID
 app.get("/users/:id", async (req, res) => {
   try {
@@ -128,9 +145,71 @@ app.put("/users/:id", async (req, res) => {
       email,
       req.params.id,
     ]);
-    res.send("User berhasil diupdate");
+    res.json({ message: "User berhasil diupdate" });
   } catch (err) {
     res.status(500).send(err);
+  }
+});
+
+// PUT update project
+app.put("/api/projects/:id", upload.single("image"), async (req, res) => {
+  try {
+    const {
+      title,
+      subtitle,
+      description,
+      features,
+      technologies,
+      slug,
+      release_date,
+      development_time,
+      platforms,
+      source_code,
+      trailer_url,
+      team,
+      logic_js,
+      genre,
+    } = req.body;
+
+    const imageBuffer = req.file ? req.file.buffer : null;
+
+    let query = `
+      UPDATE projects SET
+        title = ?, subtitle = ?, description = ?, features = ?, technologies = ?,
+        slug = ?, release_date = ?, development_time = ?, platforms = ?, source_code = ?,
+        trailer_url = ?, team = ?, logic_js = ?, genre = ?
+    `;
+
+    const values = [
+      title,
+      subtitle,
+      description,
+      features,
+      technologies,
+      slug,
+      release_date,
+      development_time,
+      platforms,
+      source_code,
+      trailer_url,
+      team,
+      logic_js,
+      genre,
+    ];
+
+    if (imageBuffer) {
+      query += `, image = ?`;
+      values.push(imageBuffer);
+    }
+
+    query += ` WHERE id = ?`;
+    values.push(req.params.id);
+
+    const [result] = await db.query(query, values);
+    res.json({ success: true, message: "Project berhasil diperbarui" });
+  } catch (error) {
+    console.error("Gagal update project:", error);
+    res.status(500).json({ success: false, message: "Gagal update project" });
   }
 });
 
@@ -147,50 +226,45 @@ app.delete("/users/:id", async (req, res) => {
 // DELETE project
 app.delete("/api/projects/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
+    // 1️⃣ Ambil slug dari project yang akan dihapus
+    const [projects] = await db.query(
+      "SELECT slug FROM projects WHERE id = ?",
+      [id]
+    );
+    if (projects.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Project not found" });
+    }
+    const slug = projects[0].slug;
+
+    // 2️⃣ Hapus project
     await db.query("DELETE FROM projects WHERE id = ?", [id]);
-    res.status(200).json({ success: true, message: "Project deleted" });
+
+    // 3️⃣ Hapus semua asset dari tabel images yang memiliki slug yang sama
+    await db.query("DELETE FROM images WHERE slug = ?", [slug]);
+
+    // 4️⃣ Sukses
+    res.status(200).json({
+      success: true,
+      message: `Project dan asset dengan slug '${slug}' dihapus`,
+    });
   } catch (error) {
-    console.error("❌ Error deleting project:", error.message, "↩️", error);
+    console.error("❌ Error deleting project & assets:", error.message);
     res
       .status(500)
       .json({ success: false, message: "Server error", detail: error.message });
   }
 });
 
-// POST project
-app.post("/api/projects", async (req, res) => {
+// POST project with image upload
+app.post("/api/projects", upload.single("image"), async (req, res) => {
   try {
     const {
       title,
       subtitle,
-      image_url,
-      description,
-      features,
-      technologies,
-      slug,
-      release_date,
-      development_time,
-      platforms,
-      source_code, // ✅ BUKAN source_code_url
-      trailer_url,
-      team,
-      physics,
-      logic_js,
-      genre,
-      play_url,
-    } = req.body;
-
-    const query = `
-  INSERT INTO projects
-  (title, subtitle, image_url, description, features, technologies, slug, release_date, development_time, platforms, source_code, trailer_url, team, physics, logic_js, genre, play_url)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`;
-
-    const values = [
-      title,
-      subtitle,
-      image_url,
       description,
       features,
       technologies,
@@ -201,11 +275,36 @@ app.post("/api/projects", async (req, res) => {
       source_code,
       trailer_url,
       team,
-      physics,
       logic_js,
       genre,
-      play_url,
+    } = req.body;
+
+    const image = req.file ? req.file.buffer : null; // ambil buffer file gambar
+
+    const query = `
+      INSERT INTO projects
+      (title, subtitle, image, description, features, technologies, slug, release_date, development_time, platforms, source_code, trailer_url, team, logic_js, genre)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+      title,
+      subtitle,
+      image,
+      description,
+      features,
+      technologies,
+      slug,
+      release_date,
+      development_time,
+      platforms,
+      source_code,
+      trailer_url,
+      team,
+      logic_js,
+      genre,
     ];
+
     const [result] = await db.query(query, values);
     res.json({
       success: true,
@@ -231,7 +330,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
       "INSERT INTO images (name, type, data, slug) VALUES (?, ?, ?, ?)",
       [originalname, mimetype, buffer, slug]
     );
-    res.redirect("/upload.html");
+    res.redirect("/dashboard.html#assets");
   } catch (err) {
     console.error(err);
     res.status(500).send("❌ Gagal menyimpan ke database");

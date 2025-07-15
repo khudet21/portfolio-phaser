@@ -8,37 +8,47 @@
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
+
+    <!-- tinyMCE -->
+    <!-- <script
+      src="https://cdn.tiny.cloud/1/ydly6rbhyulpklyti5xsu56zf3ay54y6w0t2ctf99refrebm/tinymce/6/tinymce.min.js"
+      referrerpolicy="origin"
+    ></script> -->
+
     <link rel="stylesheet" href="Css/dashboard.css" />
-    <style>
-      .hidden {
-        display: none;
-      }
-      .section {
-        display: none;
-      }
-      .section.active {
-        display: block;
-      }
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-      }
-      .modal-content {
-        background-color: #fff;
-        margin: 10% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 400px;
-      }
-    </style>
+    <!-- Highlight.js CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+    />
+
+    <!-- CodeMirror Core -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+
+    <!-- JavaScript Mode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+
+    <!-- Dracula Theme -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css"
+    />
+
+    <!-- Code Folding -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/comment-fold.min.js"></script>
   </head>
+
   <body>
     <div class="sidebar">
       <h2>🕹️ Sam Dev</h2>
@@ -50,7 +60,7 @@
     </div>
 
     <div class="main-content">
-      <div class="section active" id="users">
+      <div class="section" id="users">
         <header>
           <h1>📊 USERS</h1>
           <button class="refresh-btn" onclick="openUserForm()">
@@ -60,7 +70,7 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th>
+              <!-- <th>ID</th> -->
               <th>Name</th>
               <th>Email</th>
               <th>Action</th>
@@ -80,11 +90,11 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th>
+              <!-- <th>ID</th> -->
               <th>Title</th>
               <th>Genre</th>
-              <th>Release</th>
-              <th>Platforms</th>
+              <th>Slug</th>
+              <th>Description</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -93,17 +103,14 @@
       </div>
 
       <div class="section" id="assets">
-        <header><h1>📦 ASSETS</h1></header>
+        <header>
+          <h1>📦 ASSETS</h1>
+          <button class="refresh-btn" onclick="openAssetModal()">
+            ➕ Add Asset
+          </button>
+        </header>
         <!-- <p>Coming soon...</p> -->
-        <h1>Upload Gambar</h1>
-
-        <form action="/upload" method="POST" enctype="multipart/form-data">
-          <input type="file" name="image" required />
-          <button type="submit">Upload</button>
-          <select name="slug" id="slugSelect"></select>
-        </form>
-
-        <h2>Daftar Gambar</h2>
+        <!-- <h2>Daftar Gambar</h2> -->
         <table border="1" id="imageTable">
           <thead>
             <tr>
@@ -121,50 +128,78 @@
     <div id="user-modal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeUserForm()">&times;</span>
-        <h2>Tambah User</h2>
+        <h2>User</h2>
         <form id="add-user-form">
+          <input type="hidden" id="user-id" />
           <input type="text" id="name" placeholder="Nama User" required />
           <input type="email" id="email" placeholder="Email User" required />
           <button type="submit">Tambah</button>
         </form>
-        <div id="add-user-status"></div>
+        <div id="add-user-status" style="display: none"></div>
       </div>
     </div>
 
     <div id="projectModal" class="modal">
       <div class="modal-content">
-        <h2>➕ Tambah Project</h2>
-        <form id="projectForm">
+        <span class="close" onclick="closeProjectModal()">&times;</span>
+        <h2>Project</h2>
+        <form enctype="multipart/form-data" id="projectForm">
           <input name="title" placeholder="Judul" required />
           <input name="subtitle" placeholder="Subjudul" />
-          <input name="image_url" placeholder="URL Gambar" />
+          <input type="file" name="image" accept="image/*" required />
           <input name="description" placeholder="Deskripsi" />
           <input name="features" placeholder="Fitur (pisah koma)" />
           <input name="technologies" placeholder="Teknologi (pisah koma)" />
-          <input name="release_date" type="date" />
+          <input class="date" name="release_date" type="date" />
           <input name="development_time" placeholder="Waktu Pengembangan" />
           <input name="team" placeholder="Tim" />
           <input name="genre" placeholder="Genre" />
           <input name="platforms" placeholder="Platform" />
-          <input name="source_code_url" placeholder="URL Source Code" />
+          <input name="source_code" placeholder="URL Source Code" />
           <input name="trailer_url" placeholder="URL Trailer" />
           <input name="slug" placeholder="Slug unik" />
-          <select name="physics">
-            <option value="arcade">arcade</option>
-            <option value="matter">matter</option>
-          </select>
-          <textarea
-            name="logic_js"
-            placeholder="Logic JS (opsional)"
-          ></textarea>
+          <div class="editor-container">
+            <button
+              type="button"
+              class="fullscreen-toggle"
+              onclick="toggleFullScreenEditor()"
+            >
+              ⛶
+            </button>
+            <textarea
+              id="editor"
+              name="logic_js"
+              placeholder="Logic JS (opsional)"
+            ></textarea>
+          </div>
           <div>
-            <button type="button" onclick="closeProjectModal()">Batal</button>
             <button type="submit">Simpan</button>
           </div>
         </form>
       </div>
     </div>
 
+    <div id="assetModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeAssetModal()">&times;</span>
+        <h2>Asset</h2>
+        <form
+          action="/upload"
+          method="POST"
+          enctype="multipart/form-data"
+          id="assetForm"
+        >
+          <input type="file" name="image" required />
+          <select name="slug" id="slugSelect"></select>
+          <button type="submit">Upload</button>
+        </form>
+      </div>
+    </div>
+    <pre><code id="logic-display" class="language-javascript"></code></pre>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
     <script src="JS/dashboard.js"></script>
   </body>
 </html>

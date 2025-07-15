@@ -19,7 +19,6 @@
     gameScript.type = "text/javascript";
     gameScript.textContent = fullCodeWithSlug;
     document.body.appendChild(gameScript);
-
   } catch (err) {
     console.error("Error saat load game:", err);
     alert("Gagal memuat game.");
