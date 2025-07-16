@@ -107,6 +107,23 @@ app.get("/api/project-image/:id", async (req, res) => {
   }
 });
 
+app.get("/api/project-image/:id", async (req, res) => {
+  try {
+    const [results] = await db.query(
+      "SELECT image FROM projects WHERE id = ?",
+      [req.params.id]
+    );
+    if (results.length === 0 || !results[0].image) {
+      return res.status(404).send("Image not found");
+    }
+
+    res.setHeader("Content-Type", "image/png"); // atau image/jpeg jika sesuai
+    res.send(results[0].image); // langsung kirim binary image
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 // GET user by ID
 app.get("/users/:id", async (req, res) => {
   try {
@@ -223,6 +240,15 @@ app.delete("/users/:id", async (req, res) => {
   }
 });
 
+app.delete("/spritesheet/:id", async (req, res) => {
+  try {
+    await db.query("DELETE FROM spritesheet WHERE id = ?", [req.params.id]);
+    res.send("Spritesheet berhasil dihapus");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 // DELETE project
 app.delete("/api/projects/:id", async (req, res) => {
   const { id } = req.params;
@@ -318,7 +344,7 @@ app.post("/api/projects", upload.single("image"), async (req, res) => {
 });
 
 // POST upload asset
-app.post("/upload", upload.single("image"), async (req, res) => {
+app.post("/gambar", upload.single("image"), async (req, res) => {
   if (!req.file || !req.body.slug)
     return res.status(400).send("❌ File atau slug tidak ditemukan");
 
@@ -330,9 +356,37 @@ app.post("/upload", upload.single("image"), async (req, res) => {
       "INSERT INTO images (name, type, data, slug) VALUES (?, ?, ?, ?)",
       [originalname, mimetype, buffer, slug]
     );
-    res.redirect("/dashboard.html#assets");
+    res.redirect("/dashboard.html#images");
   } catch (err) {
     console.error(err);
+    res.status(500).send("❌ Gagal menyimpan ke database");
+  }
+});
+
+app.post("/spr", upload.single("image"), async (req, res) => {
+  if (!req.file || !req.body.slug)
+    return res.status(400).send("❌ File atau slug tidak ditemukan");
+
+  const { originalname, mimetype, buffer } = req.file;
+  const { slug, width, height } = req.body;
+
+  // console.log("Uploading:", {
+  //   filename: originalname,
+  //   type: mimetype,
+  //   dataSize: buffer?.length,
+  //   slug,
+  //   width,
+  //   height,
+  // });
+
+  try {
+    await db.query(
+      "INSERT INTO spritesheet (filename, type, data, slug, width, height) VALUES (?, ?, ?, ?, ?, ?)",
+      [originalname, mimetype, buffer, slug, width || null, height || null]
+    );
+    res.redirect("/dashboard.html#spritesheet");
+  } catch (err) {
+    console.error("❌ Gagal menyimpan ke database:", err);
     res.status(500).send("❌ Gagal menyimpan ke database");
   }
 });
@@ -414,6 +468,55 @@ app.get("/game/:slug", async (req, res) => {
   res.json({
     fullCode: rows[0].logic_js, // ini adalah string JavaScript lengkap
   });
+});
+
+app.get("/spritesheet", async (req, res) => {
+  try {
+    const [spritesheet] = await db.query(
+      "SELECT id, filename, type, slug, width, height FROM spritesheet"
+    );
+    res.json(spritesheet);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal mengambil spritesheet");
+  }
+});
+
+// Endpoint untuk menampilkan gambar berdasarkan ID
+app.get("/spritesheet/:id", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM spritesheet WHERE id = ?", [
+      req.params.id,
+    ]);
+    if (rows.length === 0)
+      return res.status(404).send("Spritesheet tidak ditemukan");
+
+    const spritesheet = rows[0];
+    res.setHeader("Content-Type", spritesheet.type);
+    res.send(spritesheet.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal menampilkan spritesheet");
+  }
+});
+
+app.get("/spritesheet/:slug/:filename", async (req, res) => {
+  const { slug, name } = req.params;
+  try {
+    const [rows] = await db.query(
+      "SELECT * FROM spritehseet WHERE slug = ? AND filename = ? AND width = ? AND height = ?",
+      [slug, name]
+    );
+    if (rows.length === 0)
+      return res.status(404).send("Spritesheet tidak ditemukan");
+
+    const spritesheet = rows[0];
+    res.setHeader("Content-Type", spritesheet.type);
+    res.send(spritesheet.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Gagal menampilkan spritesheet");
+  }
 });
 
 app.get("/", (req, res) => {

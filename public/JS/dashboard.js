@@ -214,6 +214,24 @@ function deleteUser(id) {
     .catch((err) => console.error(err));
 }
 
+function deleteSprite(id) {
+  const yakin = confirm("Apakah Anda yakin ingin menghapus sprite ini?");
+  if (!yakin) return; // kalau user klik "Batal", tidak lanjut hapus
+
+  fetch(`/spritesheet/${id}`, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Gagal menghapus sprite");
+      return res.text();
+    })
+    .then((msg) => {
+      console.log(msg);
+      loadSpriteSheet(); // reload data
+    })
+    .catch((err) => console.error(err));
+}
+
 // Function to submit the user form
 function submitUserForm(event) {
   event.preventDefault(); // agar tidak reload halaman
@@ -278,6 +296,15 @@ function closeAssetModal() {
   document.getElementById("assetForm").reset();
 }
 
+function openSprModal() {
+  document.getElementById("sprModal").style.display = "block";
+}
+
+function closeSprModal() {
+  document.getElementById("sprModal").style.display = "none";
+  document.getElementById("sprForm").reset();
+}
+
 function clearProjectForm() {
   editor.setValue("");
   setTimeout(() => editor.refresh(), 100);
@@ -299,16 +326,21 @@ function backToMainMenu() {
   document.getElementById("main-menu").classList.remove("hidden");
 }
 
-// Ambil daftar slug dari server
 fetch("/slugs")
   .then((res) => res.json())
   .then((slugs) => {
-    const select = document.getElementById("slugSelect");
-    slugs.forEach(({ slug }) => {
-      const option = document.createElement("option");
-      option.value = slug;
-      option.textContent = slug;
-      select.appendChild(option);
+    const selects = document.querySelectorAll("select[name='slug']"); // semua select untuk slug
+    selects.forEach((select) => {
+      // Kosongkan dulu (optional, kalau tidak ingin duplicate)
+      select.innerHTML = "";
+
+      // Tambahkan opsi
+      slugs.forEach(({ slug }) => {
+        const option = document.createElement("option");
+        option.value = slug;
+        option.textContent = slug;
+        select.appendChild(option.cloneNode(true)); // clone untuk menghindari referensi DOM ganda
+      });
     });
   });
 
@@ -359,48 +391,24 @@ async function loadImages() {
   }
 }
 
-//contoh data sprite sheet
-const arrsprite = [
-  {
-    filename: "hero_run.png",
-    url: "../asset/flapAsset/BG1.png",
-    slug: "hero-run",
-    width: 64,
-    height: 64,
-  },
-  {
-    filename: "enemy_walk.png",
-    url: "../asset/flapAsset/BG2.png",
-    slug: "hero-run",
-    width: 64,
-    height: 64,
-  },
-  {
-    filename: "background_tiles.png",
-    url: "../asset/flapAsset/BG3.png",
-    slug: "hero-run",
-    width: 256,
-    height: 256,
-  },
-];
-
 async function loadSpriteSheet() {
-  // const res = await fetch("/spritesheet");
-  // const images = await res.json();
+  const res = await fetch("/spritesheet");
+  const spritesheet = await res.json();
   const tbody = document.querySelector("#spritesheetTable tbody");
   tbody.innerHTML = "";
 
-  for (const sprite of arrsprite) {
+  for (const sprite of spritesheet) {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${sprite.filename}</td>
-      <td><img src="${sprite.url}" alt="preview" width="64" /></td>
+      <td><img src="/spritesheet/${sprite.id}" alt="preview" width="250" /></td>
       <td>${sprite.slug}</td>
-      <td>${sprite.width} x ${sprite.height}</td> <!-- Gabungan ukuran -->
       <td>
-        <button onclick="editSprite('${sprite.slug}')">✏️</button>
-        <button onclick="deleteSprite('${sprite.slug}')">🗑️</button>
-      </td>
+      <h4> Width : ${sprite.width}</h4> <h4> Height : ${sprite.height}</h4></td> <!-- Gabungan ukuran -->
+      <td>
+        <button onclick="editSprite('${sprite.id}')">✏️</button>
+        <button onclick="deleteSprite('${sprite.id}')">🗑️</button>
+      </td> 
     `;
     tbody.appendChild(row);
   }
@@ -500,5 +508,3 @@ window.addEventListener("load", () => {
 // Panggil saat halaman dimuat
 loadImages();
 loadSpriteSheet();
-
-

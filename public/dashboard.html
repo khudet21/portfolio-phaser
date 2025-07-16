@@ -122,7 +122,7 @@
     <div class="section" id="spritesheet">
       <header>
         <h1>🧩 Spritesheet</h1>
-        <button class="refresh-btn" onclick="openAssetModal()">
+        <button class="refresh-btn" onclick="openSprModal()">
           ➕ Add Spritesheet
         </button>
       </header>
@@ -220,13 +220,28 @@
       <div class="modal-content">
         <span class="close" onclick="closeAssetModal()">&times;</span>
         <h2>Asset</h2>
-        <form action="/upload" method="POST" enctype="multipart/form-data" id="assetForm">
+        <form action="/gambar" method="POST" enctype="multipart/form-data" id="assetForm">
           <input type="file" name="image" required />
-          <select name="slug" id="slugSelect"></select>
+          <select name="slug" id="slugSelectImage"></select>
           <button type="submit">Upload</button>
         </form>
       </div>
     </div>
+
+    <div id="sprModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeSprModal()">&times;</span>
+        <h2>Asset</h2>
+        <form action="/spr" method="POST" enctype="multipart/form-data" id="sprForm">
+          <input type="file" name="image" required />
+          <input name="width" placeholder="Width" />
+          <input name="height" placeholder="Height" />
+          <select name="slug" id="slugSelectSprite"></select>
+          <button type="submit">Upload</button>
+        </form>
+      </div>
+    </div>
+
     <pre><code id="logic-display" class="language-javascript"></code></pre>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>
