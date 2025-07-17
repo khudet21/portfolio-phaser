@@ -33,39 +33,45 @@ const game = new Phaser.Game(config);
 let X_POSITION;
 let Y_POSITION;
 function preload() {
-  this.load.image("bg", "/asset/Pipes/bg.png");
-  this.load.image("lader", "/asset/Pipes/lader.png");
-  this.load.image("bigPipe", "/asset/Pipes/bigPipe.png");
-  this.load.image("connectPipe", "/asset/Pipes/connectPipe.png");
-  this.load.image("faucetWater", "/asset/Pipes/faucetPipe.png");
-  this.load.image("faucetPipe", "/asset/Pipes/faucetWater.png");
-  this.load.image("pipe", "/asset/Pipes/pipe.png");
-  this.load.image("pipeElbow", "/asset/Pipes/pipeElbow.png");
-  this.load.image("rotatePipe", "/asset/Pipes/rotatePipe.png");
-  this.load.image("selectPipe", "/asset/Pipes/selectPipe.png");
-  this.load.image("circlePipe", "/asset/Pipes/circlePipe.png");
-  this.load.image("recPipe", "/asset/Pipes/recPipe.png");
-  this.load.image("lumutIjo", "/asset/Pipes/lumutIjo.png");
+  this.load.image("bg", "../asset/Pipes/bg.png");
+  this.load.image("lader", "../asset/Pipes/lader.png");
+  this.load.image("bigPipe", "../asset/Pipes/bigPipe.png");
+  this.load.image("connectPipe", "../asset/Pipes/connectPipe.png");
+  this.load.image("faucetWater", "../asset/Pipes/faucetPipe.png");
+  this.load.image("faucetPipe", "../asset/Pipes/faucetWater.png");
+  this.load.image("pipe", "../asset/Pipes/pipe.png");
+  this.load.image("pipeElbow", "../asset/Pipes/pipeElbow.png");
+  this.load.image("rotatePipe", "../asset/Pipes/rotatePipe.png");
+  this.load.image("selectPipe", "../asset/Pipes/selectPipe.png");
+  this.load.image("circlePipe", "../asset/Pipes/circlePipe.png");
+  this.load.image("recPipe", "../asset/Pipes/recPipe.png");
+  this.load.image("lumutIjo", "../asset/Pipes/lumutIjo.png");
+  // Load Spritesheet
+  this.load.spritesheet("sps_mummy", "../asset/Pipes/ikanCoklat.png", {
+    frameWidth: 151,
+    frameHeight: 130,
+  });
+}
+
+function shuffle(array) {
+  let currentIndex = array.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
 }
 
 function create() {
-  function shuffle(array) {
-    let currentIndex = array.length;
-
-    // While there remain elements to shuffle...
-    while (currentIndex != 0) {
-      // Pick a remaining element...
-      let randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-
-      // And swap it with the current element.
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex],
-        array[currentIndex],
-      ];
-    }
-  }
-
+  // Inisialisasi posisi X dan Y
   let X_POSITION = {
     LEFT: 0,
     CENTER: game.canvas.width / 2,
@@ -84,6 +90,19 @@ function create() {
     { x: 350.02697022767074, y: 511.03971057266625 },
   ];
   shuffle(posLumut);
+
+  const mummyAnimation = this.anims.create({
+    key: "walk",
+    frames: this.anims.generateFrameNumbers("sps_mummy"),
+    frameRate: 16,
+  });
+
+  for (let i = 0; i < 5; i++) {
+    const sprite = this.add
+      .sprite(X_POSITION.CENTER - 300 + (i * 150), Y_POSITION.CENTER - 85, "sps_mummy")
+      .setScale(2).setDepth(1.5);
+    sprite.play({ key: "walk", repeat: -1 });
+  }
 
   let myScene = this;
   let arrQuesPipe = [];
@@ -598,7 +617,6 @@ function create() {
   //==Called Function==//
   spawnBigPipe();
 }
-
 
 //Animation
 // function create(){

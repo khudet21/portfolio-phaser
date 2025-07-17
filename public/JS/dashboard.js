@@ -1,3 +1,21 @@
+fetch("/slugs")
+  .then((res) => res.json())
+  .then((slugs) => {
+    const selects = document.querySelectorAll("select[name='slug']"); // semua select untuk slug
+    selects.forEach((select) => {
+      // Kosongkan dulu (optional, kalau tidak ingin duplicate)
+      select.innerHTML = "";
+
+      // Tambahkan opsi
+      slugs.forEach(({ slug }) => {
+        const option = document.createElement("option");
+        option.value = slug;
+        option.textContent = slug;
+        select.appendChild(option.cloneNode(true)); // clone untuk menghindari referensi DOM ganda
+      });
+    });
+  });
+
 // Initialize C odeMirror editor
 const editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
   lineNumbers: true,
@@ -25,8 +43,6 @@ function toggleFullScreenEditor() {
   const isFullscreen = document.body.classList.toggle("fullscreen");
   codeEditor.refresh();
 }
-
-updateToggleButtonPosition(); // posisi awal
 
 // Periksa ulang saat konten berubah
 editor.on("change", () => {
@@ -232,6 +248,24 @@ function deleteSprite(id) {
     .catch((err) => console.error(err));
 }
 
+function deleteAudio(id) {
+  const yakin = confirm("Apakah Anda yakin ingin menghapus audio ini?");
+  if (!yakin) return; // kalau user klik "Batal", tidak lanjut hapus
+
+  fetch(`/audio/${id}`, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Gagal menghapus audio");
+      return res.text();
+    })
+    .then((msg) => {
+      console.log(msg);
+      loadAudio(); // reload data
+    })
+    .catch((err) => console.error(err));
+}
+
 // Function to submit the user form
 function submitUserForm(event) {
   event.preventDefault(); // agar tidak reload halaman
@@ -276,7 +310,25 @@ function closeUserForm() {
 }
 
 // Function to open the project modal
-function openProjectModal() {
+function openProjectModal(project = null) {
+  const form = document.getElementById("projectForm");
+  const imageInput = document.getElementById("image");
+
+  if (project) {
+    // MODE EDIT
+    form.dataset.projectId = project.id;
+    imageInput.required = false; // tidak wajib saat edit
+
+    // isi input lainnya...
+  } else {
+    // MODE TAMBAH
+    delete form.dataset.projectId;
+    imageInput.required = true; // wajib upload saat tambah
+
+    form.reset(); // reset form biar kosong
+  }
+
+  // tampilkan modal
   document.getElementById("projectModal").style.display = "block";
   setTimeout(() => editor.refresh(), 50);
 }
@@ -305,6 +357,15 @@ function closeSprModal() {
   document.getElementById("sprForm").reset();
 }
 
+function openAudioModal() {
+  document.getElementById("audioModal").style.display = "block";
+}
+
+function closeAudioModal() {
+  document.getElementById("audioModal").style.display = "none";
+  document.getElementById("audioForm").reset();
+}
+
 function clearProjectForm() {
   editor.setValue("");
   setTimeout(() => editor.refresh(), 100);
@@ -325,24 +386,6 @@ function backToMainMenu() {
   document.getElementById("assets-submenu").classList.add("hidden");
   document.getElementById("main-menu").classList.remove("hidden");
 }
-
-fetch("/slugs")
-  .then((res) => res.json())
-  .then((slugs) => {
-    const selects = document.querySelectorAll("select[name='slug']"); // semua select untuk slug
-    selects.forEach((select) => {
-      // Kosongkan dulu (optional, kalau tidak ingin duplicate)
-      select.innerHTML = "";
-
-      // Tambahkan opsi
-      slugs.forEach(({ slug }) => {
-        const option = document.createElement("option");
-        option.value = slug;
-        option.textContent = slug;
-        select.appendChild(option.cloneNode(true)); // clone untuk menghindari referensi DOM ganda
-      });
-    });
-  });
 
 async function loadImages() {
   const res = await fetch("/images");
@@ -414,6 +457,32 @@ async function loadSpriteSheet() {
   }
 }
 
+async function loadAudio() {
+  const res = await fetch("/audios");
+  const audios = await res.json();
+  const tbody = document.querySelector("#audioTable tbody");
+  tbody.innerHTML = "";
+
+  for (const audio of audios) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+    <td>${audio.filename}</td>
+    <td>
+      <audio controls>
+        <source src="/audio/${audio.id}" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+    </td>
+    <td>${audio.slug}</td>    
+    <td>
+      <button onclick="editAudio('${audio.id}')">✏️</button>
+      <button onclick="deleteAudio('${audio.id}')">🗑️</button>
+    </td> 
+  `;
+    tbody.appendChild(row);
+  }
+}
+
 async function editProject(id) {
   try {
     const res = await fetch(`/api/projects/${id}`);
@@ -437,7 +506,7 @@ async function editProject(id) {
     form.trailer_url.value = project.trailer_url;
     form.slug.value = project.slug;
     editor.setValue(project.logic_js || "");
-    editor.refresh(); // ✅ Ini bagian penting
+    editor.refresh();
 
     // Preview gambar
     if (project.image) {
@@ -460,9 +529,8 @@ async function editProject(id) {
       );
     }
 
-    form.dataset.projectId = id;
-    openProjectModal(); // Tampilkan modal
-    editor.refresh(); // ✅ Ini bagian penting
+    // Panggil modal dengan project lengkap
+    openProjectModal(project);
   } catch (err) {
     console.error("Gagal muat data project:", err);
     alert("Gagal muat data project.");
@@ -508,3 +576,5 @@ window.addEventListener("load", () => {
 // Panggil saat halaman dimuat
 loadImages();
 loadSpriteSheet();
+loadAudio();
+updateToggleButtonPosition(); // posisi awal
