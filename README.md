@@ -32,3 +32,20 @@
 
    contoh:
    this.load.audio("touch", "/audio/[SLUG]/touch.mp3");
+
+4. Load Particle JSON
+   /particle/[SLUG]/pathParticle
+
+   contoh:
+   this.load.atlas("flares", "/particle/[SLUG]/flare.png", "/particle/[SLUG]/flare.json");
+
+5. Load Spine
+   /spine/[SLUG]/pathSpine
+
+   contoh:
+   this.load.spine(
+      "NamaGambarSpine",
+      "/spine/[SLUG]/coin-pro.json",
+      "/spine/[SLUG]/coin-pro.atlas",
+      true
+   ); //file image, json, atlas

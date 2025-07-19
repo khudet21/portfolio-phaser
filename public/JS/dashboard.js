@@ -284,6 +284,24 @@ function deleteJson(id) {
     .catch((err) => console.error(err));
 }
 
+function deleteAtlas(id) {
+  const yakin = confirm("Apakah Anda yakin ingin menghapus file ATLAS ini?");
+  if (!yakin) return; // kalau user klik "Batal", tidak lanjut hapus
+
+  fetch(`/atlas/${id}`, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Gagal menghapus file ATLAS");
+      return res.text();
+    })
+    .then((msg) => {
+      console.log(msg);
+      loadAtlas(); // reload data
+    })
+    .catch((err) => console.error(err));
+}
+
 // Function to submit the user form
 function submitUserForm(event) {
   event.preventDefault(); // agar tidak reload halaman
@@ -391,6 +409,15 @@ function openJsonModal() {
 function closeJsonModal() {
   document.getElementById("jsonModal").style.display = "none";
   document.getElementById("jsonForm").reset();
+}
+
+function openAtlasModal() {
+  document.getElementById("atlasModal").style.display = "block";
+}
+
+function closeAtlasModal() {
+  document.getElementById("atlasModal").style.display = "none";
+  document.getElementById("atlasForm").reset();
 }
 
 function clearProjectForm() {
@@ -534,6 +561,29 @@ async function loadJson() {
   }
 }
 
+async function loadAtlas() {
+  const res = await fetch("/atlas");
+  const atlas = await res.json();
+  const tbody = document.querySelector("#atlasTable tbody");
+  tbody.innerHTML = "";
+
+  for (const ats of atlas) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${ats.filename}</td>
+      <td>
+        <a href="/atlas/${ats.slug}/${ats.filename}" target="_blank">🔗 Lihat</a>
+      </td>
+      <td>${ats.slug}</td>
+      <td>
+        <button onclick="editAtlas('${ats.id}')">✏️</button>
+        <button onclick="deleteAtlas('${ats.id}')">🗑️</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  }
+}
+
 async function editProject(id) {
   try {
     const res = await fetch(`/api/projects/${id}`);
@@ -629,4 +679,5 @@ loadImages();
 loadSpriteSheet();
 loadAudio();
 loadJson();
+loadAtlas();
 updateToggleButtonPosition(); // posisi awal

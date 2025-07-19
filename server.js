@@ -641,43 +641,38 @@ app.get("/json", async (req, res) => {
     const [rows] = await db.query("SELECT id, filename, slug FROM json");
     res.json(rows);
   } catch (err) {
-    console.error("Gagal ambil data audio:", err);
-    res.status(500).json({ error: "Gagal mengambil data audio" });
+    console.error("Gagal ambil data json:", err);
+    res.status(500).json({ error: "Gagal mengambil data json" });
   }
 });
 
-// Endpoint untuk menampilkan audio berdasarkan ID
+// Endpoint untuk menampilkan json berdasarkan ID
 app.get("/json/:id", async (req, res) => {
-  const audioId = req.params.id;
+  const jsonId = req.params.id;
 
   try {
-    const [rows] = await db.query("SELECT filename, data FROM json WHERE id = ?", [audioId]);
+    const [rows] = await db.query("SELECT filename, data FROM json WHERE id = ?", [jsonId]);
 
     if (!rows.length) {
       return res.status(404).send("File tidak ditemukan");
     }
 
-    const audio = rows[0];
+    const json = rows[0];
 
     // Tentukan content type berdasarkan ekstensi file
-    const ext = path.extname(audio.filename).toLowerCase();
-    let contentType = "application/json"; // default untuk .json
-
-    if (ext === ".wav") contentType = "audio/wav";
-    else if (ext === ".ogg") contentType = "audio/ogg";
-    else if (ext === ".mp3") contentType = "audio/mpeg";
-    else if (ext === ".json") contentType = "application/json";
+    const ext = path.extname(json.filename).toLowerCase();
+    let contentType = "application/json"; // default untuk .json 
 
     res.setHeader("Content-Type", contentType);
-    res.setHeader("Content-Disposition", `inline; filename="${audio.filename}"`);
-    res.send(audio.data); // kirim isi file JSON (atau audio) dari database
+    res.setHeader("Content-Disposition", `inline; filename="${json.filename}"`);
+    res.send(json.data); // kirim isi file JSON (atau audio) dari database
   } catch (err) {
     console.error("Gagal kirim file:", err);
     res.status(500).send("Gagal mengambil file");
   }
 });
 
-// Endpoint untuk mendapatkan semua audio
+// Endpoint untuk mendapatkan semua json
 app.get("/json/:slug/:filename", async (req, res) => {
   const { slug, filename } = req.params;
   const [rows] = await db.query(
@@ -685,7 +680,7 @@ app.get("/json/:slug/:filename", async (req, res) => {
     [slug, filename]
   );
 
-  if (rows.length === 0) return res.status(404).send("Audio tidak ditemukan");
+  if (rows.length === 0) return res.status(404).send("File JSON tidak ditemukan");
 
   res.set("Content-Type", rows[0].mime_type);
   res.send(rows[0].data);
@@ -711,7 +706,7 @@ app.post('/json', upload.single('file'), async (req, res) => {
   }
 });
 
-// Endpoint untuk hapus spritesheet
+// Endpoint untuk hapus json
 app.delete("/json/:id", async (req, res) => {
   try {
     await db.query("DELETE FROM json WHERE id = ?", [req.params.id]);
@@ -721,6 +716,87 @@ app.delete("/json/:id", async (req, res) => {
   }
 });
 
+// ====== ATLAS ======
+// GET all atlas
+app.get("/atlas", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT id, filename, slug FROM atlas");
+    res.json(rows);
+  } catch (err) {
+    console.error("Gagal ambil data atlas:", err);
+    res.status(500).json({ error: "Gagal mengambil data atlas" });
+  }
+});
+
+// Endpoint untuk menampilkan atlas berdasarkan ID
+app.get("/atlas/:id", async (req, res) => {
+  const atlasId = req.params.id;
+
+  try {
+    const [rows] = await db.query("SELECT filename, data FROM atlas WHERE id = ?", [atlasId]);
+
+    if (!rows.length) {
+      return res.status(404).send("File tidak ditemukan");
+    }
+
+    const atlas = rows[0];
+
+    // Tentukan content type berdasarkan ekstensi file
+    const ext = path.extname(atlas.filename).toLowerCase();
+    let contentType = "application/atlas"; // default untuk .atlas
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Disposition", `inline; filename="${atlas.filename}"`);
+    res.send(atlas.data); // kirim isi file atlas (atau atlas) dari database
+  } catch (err) {
+    console.error("Gagal kirim file:", err);
+    res.status(500).send("Gagal mengambil file");
+  }
+});
+
+// Endpoint untuk mendapatkan semua atlas
+app.get("/atlas/:slug/:filename", async (req, res) => {
+  const { slug, filename } = req.params;
+  const [rows] = await db.query(
+    "SELECT data FROM atlas WHERE slug = ? AND filename = ? LIMIT 1",
+    [slug, filename]
+  );
+
+  if (rows.length === 0) return res.status(404).send("File atlas tidak ditemukan");
+
+  res.set("Content-Type", rows[0].mime_type);
+  res.send(rows[0].data);
+});
+
+// Post endpoint untuk upload JSON
+app.post('/atlas', upload.single('file'), async (req, res) => {
+  const slug = req.body.slug;
+  if (!req.file || !slug) {
+    return res.status(400).send('File dan slug wajib diisi');
+  }
+
+  try {
+    await db.execute(
+      'INSERT INTO atlas (slug, filename, data) VALUES (?, ?, ?)',
+      [slug, req.file.originalname, req.file.buffer]
+    );
+
+    res.redirect('/dashboard.html#spine');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('❌ Gagal upload file ATLAS');
+  }
+});
+
+// Endpoint untuk hapus atlas
+app.delete("/atlas/:id", async (req, res) => {
+  try {
+    await db.query("DELETE FROM atlas WHERE id = ?", [req.params.id]);
+    res.send("Atlas berhasil dihapus");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
 
 // ====== DEBUG ROUTES ======
 // Endpoint untuk mengarahkan ke portfolio.html

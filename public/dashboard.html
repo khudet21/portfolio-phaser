@@ -183,11 +183,21 @@
     <div class="section" id="spine">
       <header>
         <h1>🦴 Spine</h1>
-        <button class="refresh-btn" onclick="openAssetModal()">
+        <button class="refresh-btn" onclick="openAtlasModal()">
           ➕ Add Spine
         </button>
       </header>
-      <p>Coming soon...</p>
+      <table border="1" id="atlasTable">
+        <thead>
+          <tr>
+            <th>Nama File</th>
+            <th>Preview</th>
+            <th>Slug</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
     <div id="user-modal" class="modal">
@@ -242,7 +252,7 @@
         <h2>Asset</h2>
         <form action="/gambar" method="POST" enctype="multipart/form-data" id="assetForm">
           <select name="slug" id="slugSelectImage"></select>
-          <input type="file" name="image" required />
+          <input type="file" name="image" accept=".png" required />
           <button type="submit">Upload</button>
         </form>
       </div>
@@ -254,7 +264,7 @@
         <h2>Asset</h2>
         <form action="/spr" method="POST" enctype="multipart/form-data" id="sprForm">
           <select name="slug" id="slugSelectSprite"></select>
-          <input type="file" name="image" required />
+          <input type="file" name="image" accept=".png" required />
           <input name="width" placeholder="Width" />
           <input name="height" placeholder="Height" />
           <button type="submit">Upload</button>
@@ -267,7 +277,7 @@
         <span class="close" onclick="closeAudioModal()">&times;</span>
         <h2>Asset</h2>
         <form action="/audio" method="POST" enctype="multipart/form-data" id="audioForm">
-          <select name="slug" id="slugSelectSprite"></select>
+          <select name="slug" id="slugSelectAudio"></select>
           <input type="file" name="audio" accept="audio/*" required />
           <button type="submit">Upload </button>
         </form>
@@ -279,8 +289,20 @@
         <span class="close" onclick="closeJsonModal()">&times;</span>
         <h2>Asset</h2>
         <form action="/json" method="POST" enctype="multipart/form-data" id="jsonForm">
-          <select name="slug" id="slugSelectSprite"></select>
+          <select name="slug" id="slugSelectJson"></select>
           <input type="file" name="file" accept=".json" required />
+          <button type="submit">Upload </button>
+        </form>
+      </div>
+    </div>
+
+    <div id="atlasModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeAtlasModal()">&times;</span>
+        <h2>Asset</h2>
+        <form action="/atlas" method="POST" enctype="multipart/form-data" id="atlasForm">
+          <select name="slug" id="slugSelectAtlas"></select>
+          <input type="file" name="file" accept=".atlas" required />
           <button type="submit">Upload </button>
         </form>
       </div>
