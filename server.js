@@ -558,10 +558,9 @@ app.get("/audio/:id", async (req, res) => {
   const audioId = req.params.id;
 
   try {
-    const [rows] = await db.query(
-      "SELECT filename, file FROM audios WHERE id = ?",
-      [audioId]
-    );
+    const [rows] = await db.query("SELECT filename FROM audios WHERE id = ?", [
+      audioId,
+    ]);
 
     if (!rows.length) {
       return res.status(404).send("Audio tidak ditemukan");
@@ -634,6 +633,94 @@ app.delete("/audio/:id", async (req, res) => {
     res.status(500).send(err);
   }
 });
+
+// ====== JSON ======
+// GET all JSON
+app.get("/json", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT id, filename, slug FROM json");
+    res.json(rows);
+  } catch (err) {
+    console.error("Gagal ambil data audio:", err);
+    res.status(500).json({ error: "Gagal mengambil data audio" });
+  }
+});
+
+// Endpoint untuk menampilkan audio berdasarkan ID
+app.get("/json/:id", async (req, res) => {
+  const audioId = req.params.id;
+
+  try {
+    const [rows] = await db.query("SELECT filename, data FROM json WHERE id = ?", [audioId]);
+
+    if (!rows.length) {
+      return res.status(404).send("File tidak ditemukan");
+    }
+
+    const audio = rows[0];
+
+    // Tentukan content type berdasarkan ekstensi file
+    const ext = path.extname(audio.filename).toLowerCase();
+    let contentType = "application/json"; // default untuk .json
+
+    if (ext === ".wav") contentType = "audio/wav";
+    else if (ext === ".ogg") contentType = "audio/ogg";
+    else if (ext === ".mp3") contentType = "audio/mpeg";
+    else if (ext === ".json") contentType = "application/json";
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Disposition", `inline; filename="${audio.filename}"`);
+    res.send(audio.data); // kirim isi file JSON (atau audio) dari database
+  } catch (err) {
+    console.error("Gagal kirim file:", err);
+    res.status(500).send("Gagal mengambil file");
+  }
+});
+
+// Endpoint untuk mendapatkan semua audio
+app.get("/json/:slug/:filename", async (req, res) => {
+  const { slug, filename } = req.params;
+  const [rows] = await db.query(
+    "SELECT data FROM json WHERE slug = ? AND filename = ? LIMIT 1",
+    [slug, filename]
+  );
+
+  if (rows.length === 0) return res.status(404).send("Audio tidak ditemukan");
+
+  res.set("Content-Type", rows[0].mime_type);
+  res.send(rows[0].data);
+});
+
+// Post endpoint untuk upload JSON
+app.post('/json', upload.single('file'), async (req, res) => {
+  const slug = req.body.slug;
+  if (!req.file || !slug) {
+    return res.status(400).send('File dan slug wajib diisi');
+  }
+
+  try {
+    await db.execute(
+      'INSERT INTO json (slug, filename, data) VALUES (?, ?, ?)',
+      [slug, req.file.originalname, req.file.buffer]
+    );
+
+    res.redirect('/dashboard.html#particle');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('❌ Gagal upload file JSON');
+  }
+});
+
+// Endpoint untuk hapus spritesheet
+app.delete("/json/:id", async (req, res) => {
+  try {
+    await db.query("DELETE FROM json WHERE id = ?", [req.params.id]);
+    res.send("Json berhasil dihapus");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
 
 // ====== DEBUG ROUTES ======
 // Endpoint untuk mengarahkan ke portfolio.html

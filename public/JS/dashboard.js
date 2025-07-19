@@ -266,6 +266,24 @@ function deleteAudio(id) {
     .catch((err) => console.error(err));
 }
 
+function deleteJson(id) {
+  const yakin = confirm("Apakah Anda yakin ingin menghapus file JSON ini?");
+  if (!yakin) return; // kalau user klik "Batal", tidak lanjut hapus
+
+  fetch(`/json/${id}`, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Gagal menghapus file JSON");
+      return res.text();
+    })
+    .then((msg) => {
+      console.log(msg);
+      loadJson(); // reload data
+    })
+    .catch((err) => console.error(err));
+}
+
 // Function to submit the user form
 function submitUserForm(event) {
   event.preventDefault(); // agar tidak reload halaman
@@ -366,6 +384,15 @@ function closeAudioModal() {
   document.getElementById("audioForm").reset();
 }
 
+function openJsonModal() {
+  document.getElementById("jsonModal").style.display = "block";
+}
+
+function closeJsonModal() {
+  document.getElementById("jsonModal").style.display = "none";
+  document.getElementById("jsonForm").reset();
+}
+
 function clearProjectForm() {
   editor.setValue("");
   setTimeout(() => editor.refresh(), 100);
@@ -385,6 +412,7 @@ function openAssetsMenu() {
 function backToMainMenu() {
   document.getElementById("assets-submenu").classList.add("hidden");
   document.getElementById("main-menu").classList.remove("hidden");
+  showSection("users"); // Tampilkan section images saat menu dibuka
 }
 
 async function loadImages() {
@@ -483,6 +511,29 @@ async function loadAudio() {
   }
 }
 
+async function loadJson() {
+  const res = await fetch("/json");
+  const jsons = await res.json();
+  const tbody = document.querySelector("#jsonTable tbody");
+  tbody.innerHTML = "";
+
+  for (const json of jsons) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${json.filename}</td>
+      <td>
+        <a href="/json/${json.slug}/${json.filename}" target="_blank">🔗 Lihat</a>
+      </td>
+      <td>${json.slug}</td>
+      <td>
+        <button onclick="editJson('${json.id}')">✏️</button>
+        <button onclick="deleteJson('${json.id}')">🗑️</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  }
+}
+
 async function editProject(id) {
   try {
     const res = await fetch(`/api/projects/${id}`);
@@ -577,4 +628,5 @@ window.addEventListener("load", () => {
 loadImages();
 loadSpriteSheet();
 loadAudio();
+loadJson();
 updateToggleButtonPosition(); // posisi awal
