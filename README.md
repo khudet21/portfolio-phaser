@@ -7,7 +7,7 @@
 - preload function
 - global variable
 - physics arcade and metter
-- ukuran thumnail gambar adalah 850 x 480
+- ukuran thumbnail gambar adalah 850 x 480
 
 ---- path preload asset yang benar ----
 
