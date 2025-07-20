@@ -692,8 +692,8 @@ window.addEventListener("load", () => {
 
 // Panggil saat halaman dimuat
 loadImages();
-loadSpriteSheet();
-loadAudio();
-loadParticle();
-loadSpine();
+// loadSpriteSheet();
+// loadAudio();
+// loadParticle();
+// loadSpine();
 updateToggleButtonPosition(); // posisi awal
