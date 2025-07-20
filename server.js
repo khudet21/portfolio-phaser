@@ -25,17 +25,17 @@ app.use(bodyParser.json());
 // Koneksi ke MySQL (pakai Promise)
 const db = mysql
   .createConnection({
-    host: "maglev.proxy.rlwy.net",
+    host: "maglev.proxy.rlwy.net", //ini sesuaikan dengan host yang digunakan Railway
     user: "root",
-    port: 15711,
-    password: "LIEkDFHcwmyPbLvcnGYVyqAyXAsoqORr",
+    port: 15711, //ini sesuaikan dengan port yang digunakan Railway
+    password: "LIEkDFHcwmyPbLvcnGYVyqAyXAsoqORr", //ini sesuaikan dengan p0assword yang digunakan Railway
     database: "railway",
   })
   .promise();
 
 async function buatTabel() {
   try {
-     // Buat tabel spritesheet
+    // Buat tabel spritesheet
     await db.query(`
       CREATE TABLE IF NOT EXISTS spritesheet (
         id INT AUTO_INCREMENT PRIMARY KEY,
