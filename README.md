@@ -40,12 +40,12 @@
    this.load.atlas("flares", "/particle/[SLUG]/flare.png", "/particle/[SLUG]/flare.json");
 
 5. Load Spine
-   /spine/[SLUG]/pathSpine
+   /spine/image/[SLUG]/pathSpine
 
    contoh:
    this.load.spine(
-      "NamaGambarSpine",
-      "/spine/[SLUG]/coin-pro.json",
-      "/spine/[SLUG]/coin-pro.atlas",
+      "coin-pro",
+      "coin-pro.json",
+      "coin-pro.atlas",
       true
    ); //file image, json, atlas

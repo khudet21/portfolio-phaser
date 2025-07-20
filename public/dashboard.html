@@ -163,15 +163,16 @@
     <div class="section" id="particle">
       <header>
         <h1>✨Particle</h1>
-        <button class="refresh-btn" onclick="openJsonModal()">
+        <button class="refresh-btn" onclick="openParticleModal()">
           ➕ Add Particle
         </button>
       </header>
-      <table border="1" id="jsonTable">
+      <table border="1" id="particleTable">
         <thead>
           <tr>
             <th>Nama File</th>
-            <th>Preview</th>
+            <th>Image</th>
+            <th>Json</th>
             <th>Slug</th>
             <th>Action</th>
           </tr>
@@ -183,15 +184,17 @@
     <div class="section" id="spine">
       <header>
         <h1>🦴 Spine</h1>
-        <button class="refresh-btn" onclick="openAtlasModal()">
+        <button class="refresh-btn" onclick="openSpineModal()">
           ➕ Add Spine
         </button>
       </header>
-      <table border="1" id="atlasTable">
+      <table border="1" id="spineTable">
         <thead>
           <tr>
             <th>Nama File</th>
-            <th>Preview</th>
+            <th>Image</th>
+            <th>Json</th>
+            <th>Atlas</th>
             <th>Slug</th>
             <th>Action</th>
           </tr>
@@ -284,25 +287,29 @@
       </div>
     </div>
 
-    <div id="jsonModal" class="modal">
+    <div id="particleModal" class="modal">
       <div class="modal-content">
-        <span class="close" onclick="closeJsonModal()">&times;</span>
+        <span class="close" onclick="closeParticleModal()">&times;</span>
         <h2>Asset</h2>
-        <form action="/json" method="POST" enctype="multipart/form-data" id="jsonForm">
+        <form action="/particle" method="POST" enctype="multipart/form-data" id="ptcForm">
+          <!-- <input type="text" name="filename" placeholder="Nama file (tanpa ekstensi)" required> -->
           <select name="slug" id="slugSelectJson"></select>
-          <input type="file" name="file" accept=".json" required />
+          <input type="file" name="json" accept=".json" required />
+          <input type="file" name="image" accept=".png" required />
           <button type="submit">Upload </button>
         </form>
       </div>
     </div>
 
-    <div id="atlasModal" class="modal">
+    <div id="spineModal" class="modal">
       <div class="modal-content">
-        <span class="close" onclick="closeAtlasModal()">&times;</span>
+        <span class="close" onclick="closeSpineModal()">&times;</span>
         <h2>Asset</h2>
-        <form action="/atlas" method="POST" enctype="multipart/form-data" id="atlasForm">
+        <form action="/spine" method="POST" enctype="multipart/form-data" id="spineForm">
           <select name="slug" id="slugSelectAtlas"></select>
-          <input type="file" name="file" accept=".atlas" required />
+          <input type="file" name="image" accept=".png" required />
+          <input type="file" name="json" accept=".json" required />
+          <input type="file" name="atlas" accept=".atlas" required />
           <button type="submit">Upload </button>
         </form>
       </div>

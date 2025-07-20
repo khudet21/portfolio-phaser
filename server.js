@@ -634,165 +634,357 @@ app.delete("/audio/:id", async (req, res) => {
   }
 });
 
-// ====== JSON ======
-// GET all JSON
-app.get("/json", async (req, res) => {
+// ====== PARTICLE ======
+// GET all particle
+app.get("/particle", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT id, filename, slug FROM json");
+    const [rows] = await db.query(
+      "SELECT id, img_filename, json_filename, slug FROM particle"
+    );
     res.json(rows);
   } catch (err) {
-    console.error("Gagal ambil data json:", err);
-    res.status(500).json({ error: "Gagal mengambil data json" });
+    console.error("Gagal ambil data particle:", err);
+    res.status(500).json({ error: "Gagal mengambil data particle" });
   }
 });
 
-// Endpoint untuk menampilkan json berdasarkan ID
-app.get("/json/:id", async (req, res) => {
-  const jsonId = req.params.id;
+// Endpoint untuk menampilkan particle berdasarkan ID
+app.get("/particle/:id", async (req, res) => {
+  const ptcId = req.params.id;
 
   try {
-    const [rows] = await db.query("SELECT filename, data FROM json WHERE id = ?", [jsonId]);
+    const [rows] = await db.query(
+      "SELECT img_filename, json_filename, dImg, dJson FROM particle WHERE id = ?",
+      [ptcId]
+    );
 
     if (!rows.length) {
       return res.status(404).send("File tidak ditemukan");
     }
 
-    const json = rows[0];
+    const ptc = rows[0];
 
     // Tentukan content type berdasarkan ekstensi file
-    const ext = path.extname(json.filename).toLowerCase();
-    let contentType = "application/json"; // default untuk .json 
+    const jsn = path.extname(ptc.json_filename).toLowerCase();
+    const img = path.extname(ptc.img_filename).toLowerCase();
+    let contentType = "application/json"; // default untuk .json
+
+    if (img === ".png") contentType = "image/png";
 
     res.setHeader("Content-Type", contentType);
-    res.setHeader("Content-Disposition", `inline; filename="${json.filename}"`);
-    res.send(json.data); // kirim isi file JSON (atau audio) dari database
+    res.setHeader(
+      "Content-Disposition",
+      `inline; json_filename="${ptc.json_filename}"`
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `inline; img_filename="${ptc.img_filename}"`
+    );
+    res.send(ptc.data); // kirim isi file JSON (atau audio) dari database
   } catch (err) {
     console.error("Gagal kirim file:", err);
     res.status(500).send("Gagal mengambil file");
   }
 });
 
-// Endpoint untuk mendapatkan semua json
-app.get("/json/:slug/:filename", async (req, res) => {
+// Endpoint untuk mendapatkan semua particle
+app.get("/particle/:slug/:filename", async (req, res) => {
+  const { slug, filename } = req.params;
+
+  const [rows] = await db.query(
+    "SELECT json_filename, img_filename, dJson, dImg FROM particle WHERE slug = ? LIMIT 1",
+    [slug]
+  );
+
+  if (rows.length === 0)
+    return res.status(404).send("Particle tidak ditemukan");
+
+  const row = rows[0];
+
+  if (filename === row.json_filename) {
+    res.set("Content-Type", "application/json");
+    res.send(row.dJson);
+  } else if (filename === row.img_filename) {
+    res.set("Content-Type", "image/png"); // atau image/webp sesuai formatnya
+    res.send(row.dImg);
+  } else {
+    res.status(404).send("File tidak ditemukan");
+  }
+});
+
+// Ambil gambar dari particle
+app.get("/particle/image/:slug/:filename", async (req, res) => {
   const { slug, filename } = req.params;
   const [rows] = await db.query(
-    "SELECT data FROM json WHERE slug = ? AND filename = ? LIMIT 1",
+    "SELECT dImg FROM particle WHERE slug = ? AND img_filename = ? LIMIT 1",
     [slug, filename]
   );
 
-  if (rows.length === 0) return res.status(404).send("File JSON tidak ditemukan");
+  if (rows.length === 0) return res.status(404).send("Gambar tidak ditemukan");
 
-  res.set("Content-Type", rows[0].mime_type);
-  res.send(rows[0].data);
+  res.set("Content-Type", "image/png");
+  res.send(rows[0].dImg);
+});
+
+// Ambil JSON dari particle
+app.get("/particle/json/:slug/:filename", async (req, res) => {
+  const { slug, filename } = req.params;
+  const [rows] = await db.query(
+    "SELECT dJson FROM particle WHERE slug = ? AND json_filename = ? LIMIT 1",
+    [slug, filename]
+  );
+
+  if (rows.length === 0) return res.status(404).send("JSON tidak ditemukan");
+
+  res.set("Content-Type", "application/json");
+  res.send(rows[0].dJson);
 });
 
 // Post endpoint untuk upload JSON
-app.post('/json', upload.single('file'), async (req, res) => {
-  const slug = req.body.slug;
-  if (!req.file || !slug) {
-    return res.status(400).send('File dan slug wajib diisi');
-  }
+app.post(
+  "/particle",
+  upload.fields([
+    { name: "json", maxCount: 1 },
+    { name: "image", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { slug } = req.body;
+    const jsonFile = req.files?.json?.[0];
+    const imageFile = req.files?.image?.[0];
 
-  try {
+    if (!slug || !jsonFile || !imageFile) {
+      return res.status(400).send("Semua field wajib diisi");
+    }
+
     await db.execute(
-      'INSERT INTO json (slug, filename, data) VALUES (?, ?, ?)',
-      [slug, req.file.originalname, req.file.buffer]
+      `INSERT INTO particle (slug, json_filename, img_filename, dJson, dImg)
+     VALUES (?, ?, ?, ?, ?)`,
+      [
+        slug,
+        jsonFile.originalname,
+        imageFile.originalname,
+        jsonFile.buffer,
+        imageFile.buffer,
+      ]
     );
 
-    res.redirect('/dashboard.html#particle');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('❌ Gagal upload file JSON');
+    res.redirect("/dashboard.html#particle");
   }
-});
+);
 
-// Endpoint untuk hapus json
-app.delete("/json/:id", async (req, res) => {
+// Endpoint untuk hapus particle
+app.delete("/particle/:id", async (req, res) => {
   try {
-    await db.query("DELETE FROM json WHERE id = ?", [req.params.id]);
-    res.send("Json berhasil dihapus");
+    await db.query("DELETE FROM particle WHERE id = ?", [req.params.id]);
+    res.send("Particle berhasil dihapus");
   } catch (err) {
     res.status(500).send(err);
   }
 });
 
-// ====== ATLAS ======
-// GET all atlas
-app.get("/atlas", async (req, res) => {
+// ====== SPINE ======
+// GET all spine
+app.get("/spine", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT id, filename, slug FROM atlas");
+    const [rows] = await db.query(
+      "SELECT id, slug, img_filename, json_filename, atlas_filename FROM spine"
+    );
     res.json(rows);
   } catch (err) {
-    console.error("Gagal ambil data atlas:", err);
-    res.status(500).json({ error: "Gagal mengambil data atlas" });
+    console.error("Gagal ambil data spine:", err);
+    res.status(500).json({ error: "Gagal mengambil data spine" });
   }
 });
 
-// Endpoint untuk menampilkan atlas berdasarkan ID
-app.get("/atlas/:id", async (req, res) => {
-  const atlasId = req.params.id;
+// Endpoint untuk menampilkan spine berdasarkan ID
+app.get("/spine/:id", async (req, res) => {
+  const spnId = req.params.id;
 
   try {
-    const [rows] = await db.query("SELECT filename, data FROM atlas WHERE id = ?", [atlasId]);
+    const [rows] = await db.query(
+      "SELECT slug, img_filename, json_filename, atlas_filename, dImg, dJson, dAtlas FROM spine WHERE id = ?",
+      [spnId]
+    );
 
     if (!rows.length) {
       return res.status(404).send("File tidak ditemukan");
     }
 
-    const atlas = rows[0];
+    const spn = rows[0];
 
     // Tentukan content type berdasarkan ekstensi file
-    const ext = path.extname(atlas.filename).toLowerCase();
-    let contentType = "application/atlas"; // default untuk .atlas
+    const img = path.extname(spn.img_filename).toLowerCase();
+    const jsn = path.extname(spn.json_filename).toLowerCase();
+    const ats = path.extname(spn.json_filename).toLowerCase();
+    let contentType = "image/png"; // default untuk .png
+
+    if (img === ".png") contentType = "image/png"; // jika file PNG
+    if (jsn === ".json") contentType = "application/json"; // jika file JSON
+    if (ats === ".atlas") contentType = "application/atlas"; // jika file atlas
 
     res.setHeader("Content-Type", contentType);
-    res.setHeader("Content-Disposition", `inline; filename="${atlas.filename}"`);
-    res.send(atlas.data); // kirim isi file atlas (atau atlas) dari database
+    res.setHeader(
+      "Content-Disposition",
+      `inline; img_filename="${spn.img_filename}"`
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `inline; json_filename="${spn.json_filename}"`
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `inline; atlas_filename="${spn.atlas_filename}"`
+    );
+    res.send(spn.data); // kirim isi file spine dari database
   } catch (err) {
     console.error("Gagal kirim file:", err);
     res.status(500).send("Gagal mengambil file");
   }
 });
 
-// Endpoint untuk mendapatkan semua atlas
-app.get("/atlas/:slug/:filename", async (req, res) => {
+// Endpoint untuk mendapatkan semua spine
+app.get("/spine/image/:slug/:filename", async (req, res) => {
   const { slug, filename } = req.params;
+
   const [rows] = await db.query(
-    "SELECT data FROM atlas WHERE slug = ? AND filename = ? LIMIT 1",
-    [slug, filename]
+    `SELECT img_filename, json_filename, atlas_filename, dImg, dJson, dAtlas
+     FROM spine
+     WHERE slug = ?
+     AND (img_filename = ? OR json_filename = ? OR atlas_filename = ?)
+     LIMIT 1`,
+    [slug, filename, filename, filename]
   );
 
-  if (rows.length === 0) return res.status(404).send("File atlas tidak ditemukan");
-
-  res.set("Content-Type", rows[0].mime_type);
-  res.send(rows[0].data);
-});
-
-// Post endpoint untuk upload JSON
-app.post('/atlas', upload.single('file'), async (req, res) => {
-  const slug = req.body.slug;
-  if (!req.file || !slug) {
-    return res.status(400).send('File dan slug wajib diisi');
+  if (rows.length === 0) {
+    console.warn("File tidak ditemukan:", slug, filename);
+    return res.status(404).send("File tidak ditemukan");
   }
 
+  const row = rows[0];
+
+  if (filename === row.img_filename) {
+    res.set("Content-Type", "image/png");
+    return res.send(row.dImg);
+  } else if (filename === row.json_filename) {
+    res.set("Content-Type", "application/json");
+    return res.send(row.dJson);
+  } else if (filename === row.atlas_filename) {
+    res.set("Content-Type", "text/plain"); // atau text/x-tex seperti format .atlas
+    return res.send(row.dAtlas);
+  } else {
+    return res.status(404).send("File tidak ditemukan");
+  }
+});
+
+// Ambil gambar dari spine
+// app.get("/spine/image/:slug/:filename", async (req, res) => {
+//   try {
+//     const { slug, filename } = req.params;
+//     const [rows] = await db.query(
+//       "SELECT dImg FROM spine WHERE slug = ? AND img_filename = ? LIMIT 1",
+//       [slug, filename]
+//     );
+
+//     if (rows.length === 0) {
+//       console.warn(
+//         `Gambar tidak ditemukan: slug=${slug}, filename=${filename}`
+//       );
+//       return res.status(404).send("Gambar tidak ditemukan");
+//     }
+
+//     res.set("Content-Type", "image/png");
+//     res.send(rows[0].dImg);
+//   } catch (err) {
+//     console.error("Error ambil gambar spine:", err);
+//     res.status(500).send("Server error");
+//   }
+// });
+
+// Ambil JSON dari spine
+app.get("/spine/json/:slug/:filename", async (req, res) => {
   try {
-    await db.execute(
-      'INSERT INTO atlas (slug, filename, data) VALUES (?, ?, ?)',
-      [slug, req.file.originalname, req.file.buffer]
+    const { slug, filename } = req.params;
+    const [rows] = await db.query(
+      "SELECT dJson FROM spine WHERE slug = ? AND json_filename = ? LIMIT 1",
+      [slug, filename]
     );
 
-    res.redirect('/dashboard.html#spine');
+    if (rows.length === 0) {
+      console.warn(`JSON tidak ditemukan: slug=${slug}, filename=${filename}`);
+      return res.status(404).send("JSON tidak ditemukan");
+    }
+
+    res.set("Content-Type", "application/json");
+    res.send(rows[0].dJson);
   } catch (err) {
-    console.error(err);
-    res.status(500).send('❌ Gagal upload file ATLAS');
+    console.error("Error ambil JSON spine:", err);
+    res.status(500).send("Server error");
   }
 });
 
-// Endpoint untuk hapus atlas
-app.delete("/atlas/:id", async (req, res) => {
+// Ambil atlas dari spine
+app.get("/spine/atlas/:slug/:filename", async (req, res) => {
   try {
-    await db.query("DELETE FROM atlas WHERE id = ?", [req.params.id]);
-    res.send("Atlas berhasil dihapus");
+    const { slug, filename } = req.params;
+    const [rows] = await db.query(
+      "SELECT dAtlas FROM spine WHERE slug = ? AND atlas_filename = ? LIMIT 1",
+      [slug, filename]
+    );
+
+    if (rows.length === 0) {
+      console.warn(`Atlas tidak ditemukan: slug=${slug}, filename=${filename}`);
+      return res.status(404).send("Atlas tidak ditemukan");
+    }
+
+    res.set("Content-Type", "text/plain"); // atau application/octet-stream
+    res.send(rows[0].dAtlas);
+  } catch (err) {
+    console.error("Error ambil atlas spine:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+// Post endpoint untuk upload spine
+app.post(
+  "/spine",
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "json", maxCount: 1 },
+    { name: "atlas", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { slug } = req.body;
+    const imageFile = req.files?.image?.[0];
+    const jsonFile = req.files?.json?.[0];
+    const atlasFile = req.files?.atlas?.[0];
+
+    if (!slug || !imageFile || !jsonFile || !atlasFile) {
+      return res.status(400).send("Semua field wajib diisi");
+    }
+
+    await db.execute(
+      `INSERT INTO spine (slug, img_filename, json_filename, atlas_filename, dImg, dJson, dAtlas)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        slug,
+        imageFile.originalname,
+        jsonFile.originalname,
+        atlasFile.originalname,
+        imageFile.buffer,
+        jsonFile.buffer,
+        atlasFile.buffer,
+      ]
+    );
+
+    res.redirect("/dashboard.html#spine");
+  }
+);
+
+// Endpoint untuk hapus spine
+app.delete("/spine/:id", async (req, res) => {
+  try {
+    await db.query("DELETE FROM spine WHERE id = ?", [req.params.id]);
+    res.send("Spine berhasil dihapus");
   } catch (err) {
     res.status(500).send(err);
   }
@@ -816,7 +1008,7 @@ app.use((req, res, next) => {
     "Content-Security-Policy",
     "default-src 'self'; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-      "font-src https://fonts.gstatic.com; " +
+      "font-src 'self' https://fonts.gstatic.com; " +
       "img-src 'self' data: blob:; " +
       "script-src 'self' 'unsafe-inline'; " +
       "media-src 'self' blob: data:;"

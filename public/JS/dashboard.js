@@ -266,38 +266,38 @@ function deleteAudio(id) {
     .catch((err) => console.error(err));
 }
 
-function deleteJson(id) {
-  const yakin = confirm("Apakah Anda yakin ingin menghapus file JSON ini?");
+function deleteParticle(id) {
+  const yakin = confirm("Apakah Anda yakin ingin menghapus file particle ini?");
   if (!yakin) return; // kalau user klik "Batal", tidak lanjut hapus
 
-  fetch(`/json/${id}`, {
+  fetch(`/particle/${id}`, {
     method: "DELETE",
   })
     .then((res) => {
-      if (!res.ok) throw new Error("Gagal menghapus file JSON");
+      if (!res.ok) throw new Error("Gagal menghapus file particle");
       return res.text();
     })
     .then((msg) => {
       console.log(msg);
-      loadJson(); // reload data
+      loadParticle(); // reload data
     })
     .catch((err) => console.error(err));
 }
 
-function deleteAtlas(id) {
-  const yakin = confirm("Apakah Anda yakin ingin menghapus file ATLAS ini?");
+function deleteSpine(id) {
+  const yakin = confirm("Apakah Anda yakin ingin menghapus file spine ini?");
   if (!yakin) return; // kalau user klik "Batal", tidak lanjut hapus
 
-  fetch(`/atlas/${id}`, {
+  fetch(`/spine/${id}`, {
     method: "DELETE",
   })
     .then((res) => {
-      if (!res.ok) throw new Error("Gagal menghapus file ATLAS");
+      if (!res.ok) throw new Error("Gagal menghapus file spine");
       return res.text();
     })
     .then((msg) => {
       console.log(msg);
-      loadAtlas(); // reload data
+      loadSpine(); // reload data
     })
     .catch((err) => console.error(err));
 }
@@ -402,22 +402,22 @@ function closeAudioModal() {
   document.getElementById("audioForm").reset();
 }
 
-function openJsonModal() {
-  document.getElementById("jsonModal").style.display = "block";
+function openParticleModal() {
+  document.getElementById("particleModal").style.display = "block";
 }
 
-function closeJsonModal() {
-  document.getElementById("jsonModal").style.display = "none";
-  document.getElementById("jsonForm").reset();
+function closeParticleModal() {
+  document.getElementById("particleModal").style.display = "none";
+  document.getElementById("ptcForm").reset();
 }
 
-function openAtlasModal() {
-  document.getElementById("atlasModal").style.display = "block";
+function openSpineModal() {
+  document.getElementById("spineModal").style.display = "block";
 }
 
-function closeAtlasModal() {
-  document.getElementById("atlasModal").style.display = "none";
-  document.getElementById("atlasForm").reset();
+function closeSpineModal() {
+  document.getElementById("spineModal").style.display = "none";
+  document.getElementById("spineForm").reset();
 }
 
 function clearProjectForm() {
@@ -538,49 +538,65 @@ async function loadAudio() {
   }
 }
 
-async function loadJson() {
-  const res = await fetch("/json");
-  const jsons = await res.json();
-  const tbody = document.querySelector("#jsonTable tbody");
+async function loadParticle() {
+  const res = await fetch("/particle");
+  const particles = await res.json();
+  const tbody = document.querySelector("#particleTable tbody");
   tbody.innerHTML = "";
 
-  for (const json of jsons) {
+  for (const ptc of particles) {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${json.filename}</td>
-      <td>
-        <a href="/json/${json.slug}/${json.filename}" target="_blank">🔗 Lihat</a>
-      </td>
-      <td>${json.slug}</td>
-      <td>
-        <button onclick="editJson('${json.id}')">✏️</button>
-        <button onclick="deleteJson('${json.id}')">🗑️</button>
-      </td>
-    `;
+    <td>${ptc.img_filename}</td>
+    <td>
+      <img src="/particle/image/${ptc.slug}/${ptc.img_filename}" alt="${ptc.img_filename}" width="160" height="74" />
+    </td>
+    <td>
+      <a href="/particle/json/${ptc.slug}/${ptc.json_filename}" target="_blank">📄 JSON</a>
+    </td>
+    <td>${ptc.slug}</td>
+    <td>
+      <button onclick="editParticle('${ptc.id}')">✏️</button>
+      <button onclick="deleteParticle('${ptc.id}')">🗑️</button>
+    </td>
+  `;
     tbody.appendChild(row);
   }
 }
 
-async function loadAtlas() {
-  const res = await fetch("/atlas");
-  const atlas = await res.json();
-  const tbody = document.querySelector("#atlasTable tbody");
-  tbody.innerHTML = "";
+async function loadSpine() {
+  try {
+    const res = await fetch("/spine");
+    if (!res.ok) throw new Error("Gagal memuat data spine");
 
-  for (const ats of atlas) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${ats.filename}</td>
-      <td>
-        <a href="/atlas/${ats.slug}/${ats.filename}" target="_blank">🔗 Lihat</a>
-      </td>
-      <td>${ats.slug}</td>
-      <td>
-        <button onclick="editAtlas('${ats.id}')">✏️</button>
-        <button onclick="deleteAtlas('${ats.id}')">🗑️</button>
-      </td>
-    `;
-    tbody.appendChild(row);
+    const atlas = await res.json();
+    const tbody = document.querySelector("#spineTable tbody");
+    tbody.innerHTML = "";
+
+    atlas.forEach((ats) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${ats.img_filename}</td>
+        <td>
+          <img src="/spine/image/${ats.slug}/${ats.img_filename}" alt="${ats.img_filename}" width="150" height="64" />
+        </td>
+        <td>
+          <a href="/spine/json/${ats.slug}/${ats.json_filename}" target="_blank">📄 JSON</a>
+        </td>
+        <td>
+          <a href="/spine/atlas/${ats.slug}/${ats.atlas_filename}" target="_blank">🔗 Lihat</a>
+        </td>
+        <td>${ats.slug}</td>
+        <td>
+          <button onclick="editSpine('${ats.id}')">✏️</button>
+          <button onclick="deleteSpine('${ats.id}')">🗑️</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  } catch (error) {
+    console.error("Error saat loadSpine():", error);
+    alert("Terjadi kesalahan saat memuat data spine.");
   }
 }
 
@@ -678,6 +694,6 @@ window.addEventListener("load", () => {
 loadImages();
 loadSpriteSheet();
 loadAudio();
-loadJson();
-loadAtlas();
+loadParticle();
+loadSpine();
 updateToggleButtonPosition(); // posisi awal
