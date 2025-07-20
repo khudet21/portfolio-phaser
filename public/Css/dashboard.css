@@ -366,6 +366,7 @@
 
  /* Tablet Portrait - 768px and down */
  @media (max-width: 768px) {
+
    .mobile-menu-toggle {
      display: block;
    }
@@ -562,6 +563,8 @@
 
  /* Landscape orientation for mobile devices */
  @media (max-height: 500px) and (orientation: landscape) {
+
+
    .sidebar {
      padding: 10px;
    }
@@ -588,4 +591,5 @@
    .CodeMirror {
      height: 120px;
    }
+
  }

@@ -147,7 +147,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function showSection(id) {
+  const sidebar = document.querySelector(".sidebar");
+  sidebar.classList.remove("show");
+  removeOverlay();
   // Tampilkan section yang dipilih
+
   document.querySelectorAll(".section").forEach((sec) => {
     sec.classList.remove("active");
   });
@@ -203,7 +207,7 @@ function fetchProjects() {
             <td>${project.title}</td>
             <td>${project.genre}</td>          
             <td>${project.slug}</td>
-            <td>${project.description}</td>
+            <td>${project.subtitle}</td>
             <td><button onclick="editProject('${project.id}')">✏️</button>
             <button onclick="deleteProject(${project.id})">🗑️</button></td>
           `;
@@ -689,6 +693,119 @@ window.addEventListener("load", () => {
     if (defaultSection) defaultSection.classList.add("active");
   }
 });
+
+// Toggle Mobile Menu Function
+function toggleMobileMenu() {
+  const sidebar = document.querySelector(".sidebar");
+  const body = document.body;
+
+  // Toggle class 'show' pada sidebar untuk menampilkan/menyembunyikan menu
+  sidebar.classList.toggle("show");
+
+  // Optional: Tambah overlay untuk menutup menu ketika area luar diklik
+  if (sidebar.classList.contains("show")) {
+    // Buat overlay
+    document.getElementById("btn").style.display = "none"; // Sembunyikan tombol menu mobile
+    createOverlay();
+  } else {
+    // Hapus overlay
+    removeOverlay();
+  }
+}
+
+// Function untuk membuat overlay
+function createOverlay() {
+  // Cek apakah overlay sudah ada
+  document.getElementById("btn").style.display = "none"; // Sembunyikan tombol menu mobile
+  if (document.querySelector(".mobile-overlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "mobile-overlay";
+  overlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 999;
+          display: block;
+        `;
+
+  // Tutup menu ketika overlay diklik
+  overlay.addEventListener("click", closeMobileMenu);
+
+  document.body.appendChild(overlay);
+}
+
+function removeOverlay() {
+  const overlay = document.querySelector(".mobile-overlay");
+
+  // Hanya tampilkan tombol jika di mode mobile
+  if (window.innerWidth <= 768) {
+    document.getElementById("btn").style.display = "block";
+  } else {
+    document.getElementById("btn").style.display = "none";
+  }
+
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+// Function untuk menutup mobile menu
+function closeMobileMenu() {
+  const sidebar = document.querySelector(".sidebar");
+  sidebar.classList.remove("show");
+  document.getElementById("btn").style.display = "none"; // Sembunyikan tombol menu mobile
+  removeOverlay();
+}
+
+// Optional: Tutup menu ketika window diresize ke desktop
+window.addEventListener("resize", function () {
+  if (window.innerWidth > 768) {
+    closeMobileMenu();
+    document.getElementById("btn").style.display = "none"; // jika di desktop tidak perlu tombol toggle
+  } else {
+    document.getElementById("btn").style.display = "block"; // muncul kembali saat ke mobile
+  }
+});
+
+// Optional: Tutup menu ketika tombol ESC ditekan
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape") {
+    const sidebar = document.querySelector(".sidebar");
+    if (sidebar.classList.contains("show")) {
+      closeMobileMenu();
+    }
+  }
+});
+
+// Optional: Mencegah scroll pada body ketika menu mobile terbuka
+function toggleBodyScroll() {
+  const sidebar = document.querySelector(".sidebar");
+
+  if (sidebar.classList.contains("show")) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+}
+
+// Update fungsi toggleMobileMenu untuk include body scroll
+function toggleMobileMenu() {
+  const sidebar = document.querySelector(".sidebar");
+
+  sidebar.classList.toggle("show");
+
+  if (sidebar.classList.contains("show")) {
+    createOverlay();
+    document.body.style.overflow = "hidden";
+  } else {
+    removeOverlay();
+    document.body.style.overflow = "";
+  }
+}
 
 // Panggil saat halaman dimuat
 loadImages();
