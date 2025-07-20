@@ -554,7 +554,7 @@ async function loadParticle() {
     <td>
       <a href="/particle/json/${ptc.slug}/${ptc.json_filename}" target="_blank">📄 JSON</a>
     </td>
-    <td>${ptc.slug}</td>
+    <td>${ptc.slug} </td>
     <td>
       <button onclick="editParticle('${ptc.id}')">✏️</button>
       <button onclick="deleteParticle('${ptc.id}')">🗑️</button>
