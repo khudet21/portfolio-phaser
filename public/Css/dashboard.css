@@ -12,6 +12,57 @@
    overflow: hidden;
  }
 
+ /* Wrapper fullscreen */
+ #login-section {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100vw;
+   height: 100vh;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   backdrop-filter: blur(10px);
+   background-color: rgba(0, 0, 0, 0.6);
+   z-index: 9999;
+ }
+
+ /* Box tengah */
+ .login-container {
+   background: rgba(20, 20, 20, 0.95);
+   padding: 2rem;
+   border-radius: 10px;
+   box-shadow: 0 0 20px #00ff00;
+   width: 320px;
+   font-family: 'Press Start 2P', monospace;
+   text-align: center;
+ }
+
+ /* Input dan tombol */
+ .login-container input,
+ .login-container button {
+   width: 100%;
+   padding: 0.6rem;
+   margin-bottom: 1rem;
+   border-radius: 5px;
+   border: none;
+   font-family: 'Press Start 2P', monospace;
+ }
+
+ .login-container button {
+   background-color: #0f0;
+   color: #000;
+   font-weight: bold;
+   cursor: pointer;
+ }
+
+ .message {
+   margin-top: 1rem;
+   color: #0f0;
+   font-size: 12px;
+ }
+
+
  /* Mobile menu toggle */
  .mobile-menu-toggle {
    display: none;
@@ -213,7 +264,6 @@
  .close:hover {
    color: #fff;
  }
-
  .modal-content input,
  .modal-content select,
  .modal-content textarea {
@@ -593,3 +643,15 @@
    }
 
  }
+
+ .message {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 14px;
+}
+.message.success {
+  color: #00ff00;
+}
+.message.error {
+  color: #ff4444;
+}

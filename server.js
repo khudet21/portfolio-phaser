@@ -25,79 +25,13 @@ app.use(bodyParser.json());
 // Koneksi ke MySQL (pakai Promise)
 const db = mysql
   .createConnection({
-    host: "maglev.proxy.rlwy.net", //ini sesuaikan dengan host yang digunakan Railway
+    host: "localhost", //ini sesuaikan dengan host yang digunakan Railway
     user: "root",
-    port: 15711, //ini sesuaikan dengan port yang digunakan Railway
-    password: "LIEkDFHcwmyPbLvcnGYVyqAyXAsoqORr", //ini sesuaikan dengan p0assword yang digunakan Railway
-    database: "railway",
+    port: 3306, //ini sesuaikan dengan port yang digunakan Railway
+    password: "", //ini sesuaikan dengan p0assword yang digunakan Railway
+    database: "portfolio",
   })
   .promise();
-
-async function buatTabel() {
-  try {
-    // Buat tabel spritesheet
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS spritesheet (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        filename VARCHAR(255),
-        data LONGBLOB,
-        slug VARCHAR(100),
-        width INT,
-        height INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        type VARCHAR(100) DEFAULT 'general'
-      )
-    `);
-
-    // Buat tabel audios
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS audios (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        slug VARCHAR(100),
-        filename VARCHAR(255),
-        data LONGBLOB,
-        mime_type VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Buat tabel particle
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS particle (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        slug VARCHAR(100),
-        json_filename VARCHAR(255),
-        img_filename VARCHAR(255),
-        dJson LONGBLOB,
-        dImg LONGBLOB
-      )
-    `);
-
-    // Buat tabel spine
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS spine (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        slug VARCHAR(100),
-        img_filename VARCHAR(255),
-        json_filename VARCHAR(255),
-        atlas_filename VARCHAR(255),
-        dImg LONGBLOB,
-        dJson LONGBLOB,
-        dAtlas LONGBLOB
-      )
-    `);
-
-    await db.query(`
-      DROP TABLE assetss;
-    `);
-
-    console.log("Tabel berhasil dibuat!");
-  } catch (err) {
-    console.error("Gagal membuat tabel:", err);
-  }
-}
-
-// buatTabel();
 
 // === ROUTES ===
 
@@ -1062,6 +996,26 @@ app.delete("/spine/:id", async (req, res) => {
   }
 });
 
+// Endpoint login
+app.post('/login', (req, res) => {
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ message: 'Name and email required' });
+  }
+
+  const sql = 'SELECT * FROM users WHERE name = ? AND email = ?';
+  db.query(sql, [name, email], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Server error' });
+
+    if (results.length > 0) {
+      res.json({ success: true, user: results[0] });
+    } else {
+      res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+  });
+});
+
 // ====== DEBUG ROUTES ======
 // Endpoint untuk mengarahkan ke portfolio.html
 app.get("/", (req, res) => {
@@ -1079,11 +1033,11 @@ app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
     "default-src 'self'; " +
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-      "font-src 'self' https://fonts.gstatic.com; " +
-      "img-src 'self' data: blob:; " +
-      "script-src 'self' 'unsafe-inline'; " +
-      "media-src 'self' blob: data:;"
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: blob:; " +
+    "script-src 'self' 'unsafe-inline'; " +
+    "media-src 'self' blob: data:;"
   );
   next();
 });

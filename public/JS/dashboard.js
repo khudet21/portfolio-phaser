@@ -807,6 +807,53 @@ function toggleMobileMenu() {
   }
 }
 
+// const loginSection = document.getElementById("login-section");
+// const mainContent = document.querySelector(".main-content");
+// const loginForm = document.getElementById("login-form");
+// const loginMessage = document.getElementById("login-message");
+
+// // Cek apakah user sudah login
+// const user = JSON.parse(localStorage.getItem("user"));
+// if (user && user.name && user.email) {
+//   loginSection.style.display = "none";
+//   mainContent.style.display = "block";
+// } else {
+//   loginSection.style.display = "block";
+//   if (mainContent) mainContent.style.display = "none";
+// }
+
+// // Handle submit login
+// loginForm.addEventListener("submit", async (e) => {
+//   e.preventDefault();
+
+//   const name = document.getElementById("login-name").value.trim();
+//   const email = document.getElementById("login-email").value.trim();
+
+//   try {
+//     const response = await fetch("/login", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ name, email }),
+//     });
+
+//     const result = await response.json();
+
+//     if (result.success) {
+//       localStorage.setItem("user", JSON.stringify({ name, email }));
+//       loginMessage.innerText = "Login berhasil!";
+//       loginMessage.className = "message success";
+
+//       setTimeout(() => location.reload(), 1000);
+//     } else {
+//       loginMessage.innerText = result.message || "Login gagal. Coba lagi.";
+//       loginMessage.className = "message error";
+//     }
+//   } catch (err) {
+//     loginMessage.innerText = "Terjadi kesalahan saat login.";
+//     loginMessage.className = "message error";
+//   }
+// });
+
 // Panggil saat halaman dimuat
 loadImages();
 loadSpriteSheet();

@@ -1,62 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - SamDev</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard - SamDev</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-
-  <!-- tinyMCE -->
-  <!-- <script
+    <!-- tinyMCE -->
+    <!-- <script
       src="https://cdn.tiny.cloud/1/ydly6rbhyulpklyti5xsu56zf3ay54y6w0t2ctf99refrebm/tinymce/6/tinymce.min.js"
       referrerpolicy="origin"
     ></script> -->
 
-  <link rel="stylesheet" href="Css/dashboard.css" />
-  <!-- Highlight.js CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+    <link rel="stylesheet" href="Css/dashboard.css" />
+    <!-- Highlight.js CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+    />
 
-  <!-- CodeMirror Core -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <!-- CodeMirror Core -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
 
-  <!-- JavaScript Mode -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+    <!-- JavaScript Mode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
 
-  <!-- Dracula Theme -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css" />
+    <!-- Dracula Theme -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css"
+    />
 
-  <!-- Code Folding -->
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/brace-fold.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/comment-fold.min.js"></script>
-</head>
+    <!-- Code Folding -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/comment-fold.min.js"></script>
+  </head>
 
-<body>
-  <button class="mobile-menu-toggle" id="btn" onclick="toggleMobileMenu()">☰ Menu</button>
-  <div class="sidebar">
-    <h2>🕹️ Sam Dev</h2>
-    <div class="menu" id="main-menu">
-      <a class="active" onclick="showSection('users')">👤 Users</a>
-      <a onclick="showSection('projects')">🎮 Projects</a>
-      <a onclick="openAssetsMenu()">📦 Assets</a>
+  <body>
+    <button class="mobile-menu-toggle" id="btn" onclick="toggleMobileMenu()">
+      ☰ Menu
+    </button>
+    <div class="sidebar">
+      <h2>🕹️ Sam Dev</h2>
+      <div class="menu" id="main-menu">
+        <a class="active" onclick="showSection('users')">👤 Users</a>
+        <a onclick="showSection('projects')">🎮 Projects</a>
+        <a onclick="openAssetsMenu()">📦 Assets</a>
+      </div>
+      <!-- Submenu Assets -->
+      <div class="menu hidden" id="assets-submenu">
+        <a onclick="showSection('images')">🖼️ Image</a>
+        <a onclick="showSection('spritesheet')">🧩 SpriteSheet</a>
+        <a onclick="showSection('audio')">🔊 Audio</a>
+        <a onclick="showSection('particle')">✨ Particle</a>
+        <a onclick="showSection('spine')">🦴 Spine</a>
+        <a onclick="backToMainMenu()">🔙 Kembali</a>
+      </div>
     </div>
-    <!-- Submenu Assets -->
-    <div class="menu hidden" id="assets-submenu">
-      <a onclick="showSection('images')">🖼️ Image</a>
-      <a onclick="showSection('spritesheet')">🧩 SpriteSheet</a>
-      <a onclick="showSection('audio')">🔊 Audio</a>
-      <a onclick="showSection('particle')">✨ Particle</a>
-      <a onclick="showSection('spine')">🦴 Spine</a>
-      <a onclick="backToMainMenu()">🔙 Kembali</a>
-    </div>
-  </div>
 
-  <div class="main-content">
+    <!-- <section id="login-section">
+      <div class="login-container">
+        <h2>LOGIN</h2>
+        <form id="login-form">
+          <input
+            id="login-name"
+            type="text"
+            name="name"
+            placeholder="Nama"
+            required
+          />
+          <input
+            id="login-email"
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+          />
+          <button type="submit">Login</button>
+          <div class="message" id="login-message"></div>
+        </form>
+      </div>
+    </section> -->
+
     <div class="section" id="users">
       <header>
         <h1>📊 USERS</h1>
@@ -238,10 +276,18 @@
           <input name="trailer_url" placeholder="URL Trailer" />
           <input name="slug" placeholder="Slug unik" />
           <div class="editor-container">
-            <button type="button" class="fullscreen-toggle" onclick="toggleFullScreenEditor()">
+            <button
+              type="button"
+              class="fullscreen-toggle"
+              onclick="toggleFullScreenEditor()"
+            >
               ⛶
             </button>
-            <textarea id="editor" name="logic_js" placeholder="Logic JS (opsional)"></textarea>
+            <textarea
+              id="editor"
+              name="logic_js"
+              placeholder="Logic JS (opsional)"
+            ></textarea>
           </div>
           <div>
             <button type="submit">Simpan</button>
@@ -254,7 +300,12 @@
       <div class="modal-content">
         <span class="close" onclick="closeAssetModal()">&times;</span>
         <h2>Asset</h2>
-        <form action="/gambar" method="POST" enctype="multipart/form-data" id="assetForm">
+        <form
+          action="/gambar"
+          method="POST"
+          enctype="multipart/form-data"
+          id="assetForm"
+        >
           <select name="slug" id="slugSelectImage"></select>
           <input type="file" name="image" accept=".png" required />
           <button type="submit">Upload</button>
@@ -266,7 +317,12 @@
       <div class="modal-content">
         <span class="close" onclick="closeSprModal()">&times;</span>
         <h2>Asset</h2>
-        <form action="/spr" method="POST" enctype="multipart/form-data" id="sprForm">
+        <form
+          action="/spr"
+          method="POST"
+          enctype="multipart/form-data"
+          id="sprForm"
+        >
           <select name="slug" id="slugSelectSprite"></select>
           <input type="file" name="image" accept=".png" required />
           <input name="width" placeholder="Width" />
@@ -280,10 +336,15 @@
       <div class="modal-content">
         <span class="close" onclick="closeAudioModal()">&times;</span>
         <h2>Asset</h2>
-        <form action="/audio" method="POST" enctype="multipart/form-data" id="audioForm">
+        <form
+          action="/audio"
+          method="POST"
+          enctype="multipart/form-data"
+          id="audioForm"
+        >
           <select name="slug" id="slugSelectAudio"></select>
           <input type="file" name="audio" accept="audio/*" required />
-          <button type="submit">Upload </button>
+          <button type="submit">Upload</button>
         </form>
       </div>
     </div>
@@ -292,12 +353,17 @@
       <div class="modal-content">
         <span class="close" onclick="closeParticleModal()">&times;</span>
         <h2>Asset</h2>
-        <form action="/particle" method="POST" enctype="multipart/form-data" id="ptcForm">
+        <form
+          action="/particle"
+          method="POST"
+          enctype="multipart/form-data"
+          id="ptcForm"
+        >
           <!-- <input type="text" name="filename" placeholder="Nama file (tanpa ekstensi)" required> -->
           <select name="slug" id="slugSelectJson"></select>
           <input type="file" name="json" accept=".json" required />
           <input type="file" name="image" accept=".png" required />
-          <button type="submit">Upload </button>
+          <button type="submit">Upload</button>
         </form>
       </div>
     </div>
@@ -306,12 +372,17 @@
       <div class="modal-content">
         <span class="close" onclick="closeSpineModal()">&times;</span>
         <h2>Asset</h2>
-        <form action="/spine" method="POST" enctype="multipart/form-data" id="spineForm">
+        <form
+          action="/spine"
+          method="POST"
+          enctype="multipart/form-data"
+          id="spineForm"
+        >
           <select name="slug" id="slugSelectAtlas"></select>
           <input type="file" name="image" accept=".png" required />
           <input type="file" name="json" accept=".json" required />
           <input type="file" name="atlas" accept=".atlas" required />
-          <button type="submit">Upload </button>
+          <button type="submit">Upload</button>
         </form>
       </div>
     </div>
@@ -322,6 +393,5 @@
       hljs.highlightAll();
     </script>
     <script src="JS/dashboard.js"></script>
-</body>
-
+  </body>
 </html>
